@@ -1,0 +1,32 @@
+# 数据库
+planner.db
+planner.db-*
+
+# API Key
+.apikey
+
+# 图标/水印（个人文件）
+*.ico
+watermark.png
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# 日志
+error.log
+
+# 临时文件
+*.tmp
+*.bak
+
+# IDE
+.vscode/
+.idea/
