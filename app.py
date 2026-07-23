@@ -8,7 +8,6 @@ from typing import Dict, Optional
 
 import config
 from database import DatabaseManager
-from widgets.modern_dialog import ask_yes_no
 from widgets.sidebar import Sidebar
 from views.day_view import DayView
 from views.week_view import WeekView
@@ -289,7 +288,8 @@ class App:
 
     def on_closing(self):
         """窗口关闭事件处理"""
-        if ask_yes_no('退出确认', '确定要退出计划本吗？', parent=self.root):
+        from tkinter import messagebox
+        if messagebox.askyesno('退出确认', '确定要退出计划本吗？'):
             self.db.close()
             self.root.destroy()
 

@@ -191,19 +191,45 @@ def _call_deepseek(system_prompt, user_content):
         return None
 
 
+def _set_font(run, font_name='宋体', size=None, bold=False):
+    """正确设置中文字体（含东亚字体属性）"""
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+    run.font.name = font_name
+    if size:
+        run.font.size = size
+    run.font.bold = bold
+    # 设置东亚字体
+    rPr = run._element.get_or_add_rPr()
+    rFonts = rPr.find(qn('w:rFonts'))
+    if rFonts is None:
+        rFonts = OxmlElement('w:rFonts')
+        rPr.insert(0, rFonts)
+    rFonts.set(qn('w:eastAsia'), font_name)
+
+
 def _create_docx(content, start_date: date, end_date: date, filepath: str):
     """将 AI 生成的内容写入 docx 文件"""
     from docx import Document
     from docx.shared import Pt, Cm
     from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
 
     doc = Document()
 
-    # 设置默认字体
+    # 设置默认样式
     style = doc.styles['Normal']
     style.font.name = '宋体'
     style.font.size = Pt(11)
     style.paragraph_format.line_spacing = 1.5
+    # 东亚字体
+    rPr = style.element.get_or_add_rPr()
+    rFonts = rPr.find(qn('w:rFonts'))
+    if rFonts is None:
+        rFonts = OxmlElement('w:rFonts')
+        rPr.insert(0, rFonts)
+    rFonts.set(qn('w:eastAsia'), '宋体')
 
     # 解析内容：分离 姓名/日期/上周总结/本周计划
     lines = content.strip().split('\n')
@@ -234,13 +260,13 @@ def _create_docx(content, start_date: date, end_date: date, filepath: str):
     run = p.add_run(name_line)
     run.font.size = Pt(14)
     run.font.bold = True
-    run.font.name = '宋体'
+    _set_font(run, '宋体')
 
     # ---- 日期 ----
     p = doc.add_paragraph()
     run = p.add_run(date_line)
     run.font.size = Pt(11)
-    run.font.name = '宋体'
+    _set_font(run, '宋体')
 
     # ---- 正文 ----
     body_text = '\n'.join(body_lines)
@@ -257,7 +283,7 @@ def _create_docx(content, start_date: date, end_date: date, filepath: str):
         run = p.add_run('【本周工作内容】')
         run.font.size = Pt(12)
         run.font.bold = True
-        run.font.name = '宋体'
+        _set_font(run, '宋体')
 
         for line in work_content.split('\n'):
             line = line.strip()
@@ -271,7 +297,7 @@ def _create_docx(content, start_date: date, end_date: date, filepath: str):
                 run.font.bold = True
             else:
                 run.font.size = Pt(11)
-            run.font.name = '宋体'
+            _set_font(run, '宋体')
 
         # 空行
         doc.add_paragraph()
@@ -281,7 +307,7 @@ def _create_docx(content, start_date: date, end_date: date, filepath: str):
         run = p.add_run('【下周工作计划】')
         run.font.size = Pt(12)
         run.font.bold = True
-        run.font.name = '宋体'
+        _set_font(run, '宋体')
 
         for line in work_plan.split('\n'):
             line = line.strip()
@@ -290,7 +316,7 @@ def _create_docx(content, start_date: date, end_date: date, filepath: str):
             p = doc.add_paragraph()
             run = p.add_run(line)
             run.font.size = Pt(11)
-            run.font.name = '宋体'
+            _set_font(run, '宋体')
     else:
         # AI 没有按标准格式，直接输出
         for line in body_lines:
@@ -300,6 +326,6 @@ def _create_docx(content, start_date: date, end_date: date, filepath: str):
             p = doc.add_paragraph()
             run = p.add_run(line)
             run.font.size = Pt(11)
-            run.font.name = '宋体'
+            _set_font(run, '宋体')
 
     doc.save(filepath)
