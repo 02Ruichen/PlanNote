@@ -143,7 +143,8 @@ test/
 ├── cdp.mjs                 极简 CDP 客户端 + 静态服务 + 模拟 AI 接口
 ├── run-tests.mjs           端到端测试（T1–T5）
 ├── capture-shots.mjs       生成介绍页配图（写入示例数据后截图）
-└── verify-landing.mjs      介绍页整页渲染校验
+├── verify-landing.mjs      介绍页整页渲染校验
+└── verify-online.mjs       线上验收（渲染/跳转/PWA/离线/数据隔离）
 ```
 
 ---
