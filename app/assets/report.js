@@ -98,28 +98,41 @@ async function testAI({ baseUrl, apiKey, model }) {
 
 /* ---------------- 提示词 ---------------- */
 
-function buildPrompt({ plans, categories, start, end }) {
+function buildPrompt({ plans, categories, start, end, template }) {
   const cats = Object.fromEntries(categories.map(c => [c.id, c.name]));
   const rows = plans.map(p => {
     const t = p.start_time ? `${p.start_time}${p.end_time ? '-' + p.end_time : ''} ` : '';
     const st = p.status === 'completed' ? '已完成' : p.status === 'cancelled' ? '已取消' : '未完成';
-    return `- [${p.plan_date}] ${t}${p.title}｜分类：${cats[p.category_id] || '未分类'}｜难度：${PRIORITY_TEXT[p.priority] || '中等'}｜${st}${p.description ? '｜备注：' + p.description : ''}`;
+    return `- [${p.plan_date}] ${t}${p.title}｜模块：${cats[p.category_id] || '未分类'}｜难度：${PRIORITY_TEXT[p.priority] || '中等'}｜${st}${p.description ? '｜备注：' + p.description : ''}`;
   }).join('\n');
 
-  return `请根据下面这一周的计划记录，写一份中文周报。
+  const rule = String(template || '').trim();
 
+  // 有自定义规则 / 模板时，把它放在最前面并声明为最高优先级
+  const ruleBlock = rule ? `
+【本份周报必须遵守的规则 / 模板】（用户设定，硬性要求）
+下面这段是用户提供的公司周报模板、格式要求、历史样例或提示词说明。
+必须严格遵守它的结构、标题、字段、顺序、篇幅与用词；它与后面的"通用要求"冲突时，以它为准。
+不要解释你是否遵守，直接按它输出。
+<<<规则开始
+${rule}
+规则结束>>>
+` : '';
+
+  return `请根据下面这一周的任务记录，写一份中文周报。
+${ruleBlock}
 周期：${start} 至 ${end}
 共 ${plans.length} 条记录。
 
 记录明细：
 ${rows || '（本周无记录）'}
 
-要求：
-1. 用 Markdown 输出，包含四个部分：本周概览、精力分配、完成质量、下周建议。
+通用要求：
+1. ${rule ? '严格按上面「规则 / 模板」的结构与格式输出，不要自行增加或删减小节。' : '用 Markdown 输出，包含四个部分：本周概览、精力分配、完成质量、下周建议。'}
 2. 用词具体，引用真实的任务名称和数字，不要空泛的套话。
 3. 语气克制、真诚，像一个了解对方的朋友在帮她梳理，不要说教，不要用感叹号堆砌情绪。
 4. 下周建议给 2–4 条，必须可执行。
-5. 直接输出周报正文，不要任何开场白或解释。`;
+5. 直接输出周报正文，不要任何开场白、解释或"以下是"之类的引导语。`;
 }
 
 /* ---------------- 极简 Markdown 渲染 ---------------- */

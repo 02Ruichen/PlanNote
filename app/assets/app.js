@@ -28,6 +28,7 @@
     spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/></svg>',
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.5l3.5 2"/></svg>',
     chevD: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+    grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>',
     sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.1"/><circle cx="9" cy="17" r="2.1"/></svg>',
     enter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v6.5a3 3 0 01-3 3H5"/><path d="M9 10l-4.5 4.5L9 19"/></svg>',
     eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>',
@@ -57,6 +58,8 @@
     reportLoading: false,
     reportError: null,
     quickCat: null,
+    catFilter: '',      // 模块筛选，'' = 全部
+    ruleOpen: false,    // 周报规则面板是否展开
   };
 
   /* ---------------- 小工具 ---------------- */
@@ -168,9 +171,10 @@
         <button class="icon-btn" data-action="next" title="下一周">${I.right}</button>`;
     }
 
-    // 日视图的添加入口就是页面里那一行输入框，顶栏不再放「新建」，避免两个入口打对台
+    // 日视图的添加入口是页面里那一行（带「添加任务」按钮），顶栏不再重复；
+    // 周 / 月视图没有输入框，所以顶栏给一个文案明确的「新建任务」
     const newBtn = ['week', 'month'].includes(state.view)
-      ? `<button class="btn primary" data-action="new">${I.plus}新建</button>` : '';
+      ? `<button class="btn primary" data-action="new" title="在 ${fmtMD(state.date)} 新建一条任务">${I.plus}新建任务</button>` : '';
 
     tb.innerHTML = `<div class="topbar-title">${title}</div>${actions}${newBtn}`;
   }
@@ -182,27 +186,64 @@
     };
     c.innerHTML = `<div class="content-inner">${map[state.view]()}</div>`;
     c.scrollTop = 0;
+
+    // 规则框：失焦即自动保存（只写 reportTemplate 一个字段）
+    const ta = $('#report-template');
+    if (ta) {
+      ta.addEventListener('change', async () => {
+        state.settings = await saveSettings({ reportTemplate: ta.value.trim() });
+        toast('规则已自动保存');
+        renderContent();
+      });
+    }
   }
 
   /* ---------------- 日视图 ---------------- */
   function viewDay() {
-    const plans = state.plans.filter(p => p.plan_date === state.date).sort(sortPlans);
-    const done = plans.filter(p => p.status === 'completed').length;
+    const all = state.plans.filter(p => p.plan_date === state.date).sort(sortPlans);
+    const doneAll = all.filter(p => p.status === 'completed').length;
     const streak = computeStreak(state.plans);
+
+    const catFilter = state.catFilter;
+    const plans = catFilter ? all.filter(p => p.category_id === catFilter) : all;
+    const filterName = catFilter ? catOf(catFilter).name : '';
+
+    const counts = {};
+    for (const p of all) counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+
+    const modBar = `
+      <div class="mod-bar">
+        <span class="mod-cap">按模块看</span>
+        <button class="mod-chip ${catFilter ? '' : 'on'}" data-action="filter-cat" data-id="">
+          ${I.grid}<span>全部</span><b>${all.length}</b>
+        </button>
+        ${state.categories.map(c => `
+          <button class="mod-chip ${catFilter === c.id ? 'on' : ''}" data-action="filter-cat" data-id="${c.id}">
+            <span class="dot" style="--c:${c.color}"></span><span>${escapeHtml(c.name)}</span>${counts[c.id] ? `<b>${counts[c.id]}</b>` : ''}
+          </button>`).join('')}
+        <button class="mod-chip ghost" data-action="add-cat-quick" title="新建一个自己的模块">${I.plus}新建模块</button>
+      </div>`;
 
     const list = plans.length ? `
       <div class="task-list">
         ${plans.map(taskHtml).join('')}
-      </div>
-      <div class="progress-block">
-        <div class="progress-row"><span>今日完成</span><span><b>${done}</b> / ${plans.length}</span></div>
-        <div class="track"><div class="fill" style="width:${plans.length ? (done / plans.length) * 100 : 0}%"></div></div>
       </div>` : `
       <div class="empty">
         <div class="empty-ico">${I.inbox}</div>
-        <div class="empty-title">这一天还是空白的</div>
-        <div class="empty-sub">在上面写一句，回车就记下；想加时间或分类，点「详细」</div>
+        <div class="empty-title">${catFilter ? `「${escapeHtml(filterName)}」今天还没有任务` : '这一天还是空白的'}</div>
+        <div class="empty-sub">${catFilter
+          ? `在下面写一条，会自动放进「${escapeHtml(filterName)}」`
+          : '在下面写一句，点「添加任务」就记下了'}</div>
       </div>`;
+
+    const progress = all.length ? `
+      <div class="progress-block">
+        <div class="progress-row">
+          <span>今日完成${catFilter ? `（全部模块）` : ''}</span>
+          <span><b>${doneAll}</b> / ${all.length}</span>
+        </div>
+        <div class="track"><div class="fill" style="width:${(doneAll / all.length) * 100}%"></div></div>
+      </div>` : '';
 
     return `
       <div class="day-head">
@@ -217,13 +258,21 @@
         <div class="day-spacer"></div>
       </div>
 
+      ${modBar}
+
       <div class="quick-add">
-        <input id="quick-input" type="text" placeholder="今天要做点什么？" autocomplete="off">
-        <button class="btn quiet sm" data-action="quick-detail" title="补充时间、分类、难度">${I.sliders}<span class="lbl">详细</span></button>
-        <button class="btn primary quick-go" data-action="quick-add" title="记下这一条（回车）">${I.enter}</button>
+        <input id="quick-input" type="text" autocomplete="off"
+               placeholder="${catFilter
+                 ? `写一条「${escapeHtml(filterName)}」的任务`
+                 : '写下一条任务…'}">
+        <button class="btn quiet sm" data-action="quick-detail"
+                title="打开完整表单，补时间、模块、难度">${I.sliders}<span class="lbl">详细填写</span></button>
+        <button class="btn primary add-btn" data-action="quick-add"
+                title="把这条任务记到 ${fmtMD(state.date)}">${I.plus}<span class="lbl">添加任务</span></button>
       </div>
 
-      ${list}`;
+      ${list}
+      ${progress}`;
   }
 
   function taskHtml(p) {
@@ -268,14 +317,13 @@
           <div class="week-col-head" data-action="go-day" data-date="${d}">
             <span class="week-dow">${dow(d)}</span>
             <span class="week-day">${+d.split('-')[2]}</span>
-            <span class="week-count">${list.length ? done + '/' + list.length : '—'}</span>
+            <span class="week-count">${list.length ? done + '/' + list.length : ''}</span>
           </div>
           ${shown.map(p => {
             const cat = catOf(p.category_id);
             return `<div class="mini-task ${p.status === 'completed' ? 'done' : ''}" style="--c:${cat.color}" data-action="edit" data-id="${p.id}">${escapeHtml(p.title)}</div>`;
           }).join('')}
           ${list.length > 4 ? `<div class="week-more">+${list.length - 4} 项</div>` : ''}
-          ${!list.length ? '<div class="week-empty">—</div>' : ''}
         </div>`;
     }).join('')}</div>
       <div class="week-foot">
@@ -332,7 +380,7 @@
     });
     const max = Math.max(1, ...dayStats.map(s => s.total));
 
-    // 分类分布（近 30 天）
+    // 模块分布（近 30 天）
     const from30 = addDays(today, -29);
     const recent = state.plans.filter(p => p.plan_date >= from30);
     const catMap = {};
@@ -452,12 +500,36 @@
       </div></div>`;
     }
 
+    const ruleText = String(state.settings.reportTemplate || '');
+    const hasRule = !!ruleText.trim();
+
+    const ruleCard = `
+      <div class="rule-card ${state.ruleOpen ? 'open' : ''}">
+        <button class="rule-head" data-action="toggle-rule" type="button">
+          <span class="rule-ico">${I.sliders}</span>
+          <span class="rule-title">周报规则 / 模板</span>
+          <span class="rule-state ${hasRule ? 'on' : ''}">${hasRule ? '已设置 · 生成时严格遵循' : '未设置 · 用默认四段结构'}</span>
+          <span class="rule-chev">${I.chevD}</span>
+        </button>
+        ${state.ruleOpen ? `
+        <div class="rule-body">
+          <textarea id="report-template" class="rule-in" spellcheck="false"
+            placeholder="把公司周报模板、格式要求、历史样例或提示词贴进来。例如：&#10;&#10;标题固定为「周报｜{姓名}｜{日期}」&#10;四个小节：本周完成 / 关键数据 / 问题与风险 / 下周计划&#10;每节用 1. 2. 3. 序号列表，不超过 5 条&#10;语气正式，不用口语">${escapeHtml(ruleText)}</textarea>
+          <div class="rule-foot">
+            <button class="btn primary sm" data-action="save-rule" type="button">保存规则</button>
+            ${hasRule ? `<button class="btn ghost sm" data-action="clear-rule" type="button">清空</button>` : ''}
+            <span class="rule-tip">这段会原样发给模型，优先级高于默认格式</span>
+          </div>
+        </div>` : ''}
+      </div>`;
+
     return `
       <div class="report-toolbar">
         <span class="mode-pill ${ready ? 'live' : ''}">${ready ? '已接入 · ' + escapeHtml(modelName) : '未接入 AI'}</span>
         <span style="font-size:12.5px;color:var(--muted)">${fmtMD(weekStart)} — ${fmtMD(end)}</span>
         ${ready ? `<button class="btn quiet sm" data-action="settings" style="margin-left:auto">${I.settings}AI 设置</button>` : ''}
       </div>
+      ${ruleCard}
       ${body}`;
   }
 
@@ -481,7 +553,7 @@
 
     openModal(`
       <div class="modal-head">
-        <div class="modal-title">${isNew ? '新建计划' : '编辑计划'}</div>
+        <div class="modal-title">${isNew ? '新建任务' : '编辑任务'}</div>
         <button class="icon-btn" data-action="close-modal">${I.x}</button>
       </div>
       <form id="plan-form">
@@ -509,7 +581,7 @@
             </div>
           </div>
           <div class="field-row">
-            <label class="label">分类</label>
+            <label class="label">模块</label>
             <div class="cat-row" id="cat-row">${cats}</div>
           </div>
           <div class="field-row" style="margin-bottom:0">
@@ -520,7 +592,7 @@
         <div class="modal-foot">
           ${isNew ? '' : `<button type="button" class="btn danger" data-action="del-plan" data-id="${p.id}" style="margin-right:auto">删除</button>`}
           <button type="button" class="btn ghost" data-action="close-modal">取消</button>
-          <button type="submit" class="btn primary">${isNew ? '添加' : '保存'}</button>
+          <button type="submit" class="btn primary">${isNew ? '添加任务' : '保存'}</button>
         </div>
       </form>
     `, (root) => {
@@ -655,19 +727,27 @@
           </div>
         </div>
 
-        <div style="padding:18px 0 6px">
-          <div class="label" style="font-size:12.5px;margin-bottom:6px">分类</div>
+        <div class="set-block">
+          <div class="set-block-head">
+            <div class="label" style="font-size:12.5px">模块</div>
+            <span class="cat-count">${cats.length} 个 · 共 ${state.plans.filter(x => !x.is_archived).length} 条任务</span>
+          </div>
+          <div class="set-desc" style="margin-bottom:12px">任务按模块归类，和日视图顶部的模块筛选是同一套。改完名字按回车即生效，数字是当前该模块的任务数。</div>
           <div id="cat-list">
-            ${cats.map(c => `
+            ${cats.map(c => {
+              const n = state.plans.filter(x => x.category_id === c.id && !x.is_archived).length;
+              return `
               <div class="cat-row-item" data-cat-id="${c.id}">
                 <label class="cat-swatch" style="background:${c.color}">
                   <input type="color" value="${c.color}" data-cat-color="${c.id}">
                 </label>
-                <input class="cat-name-in" value="${escapeHtml(c.name)}" data-cat-name="${c.id}" maxlength="8">
-                <button class="icon-btn" data-action="del-cat" data-id="${c.id}" title="删除">${I.trash}</button>
-              </div>`).join('')}
+                <input class="cat-name-in" value="${escapeHtml(c.name)}" data-cat-name="${c.id}" maxlength="14">
+                <span class="cat-num">${n}</span>
+                <button class="icon-btn" data-action="del-cat" data-id="${c.id}" title="删除模块">${I.trash}</button>
+              </div>`;
+            }).join('')}
           </div>
-          <button class="btn ghost sm" data-action="add-cat" style="margin-top:10px">${I.plus}添加分类</button>
+          <button class="btn ghost sm" data-action="add-cat" style="margin-top:10px">${I.plus}新建模块</button>
         </div>
 
         <div style="padding:18px 0 6px">
@@ -756,7 +836,13 @@
         baseUrl: state.settings.aiBaseUrl,
         apiKey: state.settings.apiKey,
         model: state.settings.aiModel,
-        prompt: buildPrompt({ plans, categories: state.categories, start: weekStart, end }),
+        prompt: buildPrompt({
+          plans,
+          categories: state.categories,
+          start: weekStart,
+          end,
+          template: state.settings.reportTemplate || '',
+        }),
       });
       state.report = { weekStart, end, text, at: Date.now(), model: state.settings.aiModel };
       toast('周报已生成');
@@ -839,6 +925,53 @@
         openPlanModal(t.dataset.id);
         break;
 
+      case 'filter-cat': {
+        state.catFilter = t.dataset.id || '';
+        renderContent();
+        break;
+      }
+
+      case 'add-cat-quick': {
+        const raw = prompt('给新模块起个名字（例如：长期开发、副业、读书）', '新模块');
+        const name = String(raw || '').trim();
+        if (!name) return;
+        const id = 'cat-' + Date.now().toString(36);
+        await saveCategory({
+          id,
+          name: name.slice(0, 14),
+          color: CAT_COLORS[state.categories.length % CAT_COLORS.length],
+          sort_order: state.categories.length,
+          created_at: new Date().toISOString(),
+        });
+        state.catFilter = id;
+        await refresh();
+        toast(`已新建模块「${name}」`);
+        break;
+      }
+
+      case 'toggle-rule':
+        state.ruleOpen = !state.ruleOpen;
+        renderContent();
+        break;
+
+      case 'save-rule': {
+        const ta = $('#report-template');
+        const val = ta ? ta.value.trim() : '';
+        state.settings = await saveSettings({ reportTemplate: val });   // 只改这一个字段，apiKey 原样保留
+        state.ruleOpen = true;
+        renderContent();
+        toast(val ? '规则已保存，下次生成严格按它来' : '规则为空，回到默认四段结构');
+        break;
+      }
+
+      case 'clear-rule': {
+        state.settings = await saveSettings({ reportTemplate: '' });
+        state.ruleOpen = true;
+        renderContent();
+        toast('规则已清空，回到默认四段结构');
+        break;
+      }
+
       case 'quick-add': {
         const input = $('#quick-input');
         const title = (input?.value || '').trim();
@@ -846,7 +979,7 @@
         await savePlan(makePlan({
           title,
           plan_date: state.date,
-          category_id: state.quickCat || state.categories[0]?.id,
+          category_id: state.catFilter || state.quickCat || state.categories[0]?.id,
         }));
         input.value = '';
         await refresh();
@@ -978,7 +1111,7 @@
         const color = colors.find(c => !used.includes(c)) || colors[state.categories.length % colors.length];
         await saveCategory({
           id: 'cat-' + Date.now().toString(36),
-          name: '新分类',
+          name: '新模块',
           color,
           sort_order: state.categories.length,
           created_at: new Date().toISOString(),
@@ -989,13 +1122,13 @@
       }
 
       case 'del-cat': {
-        if (state.categories.length <= 1) { toast('至少要留一个分类'); return; }
+        if (state.categories.length <= 1) { toast('至少要留一个模块'); return; }
         const c = state.categories.find(x => x.id === t.dataset.id);
-        if (!confirm(`删除分类「${c.name}」？该分类下的计划会归到第一个分类。`)) return;
+        if (!confirm(`删除模块「${c.name}」？这个模块里的任务会归到第一个模块，不会丢。`)) return;
         await deleteCategory(t.dataset.id);
         await refresh();
         openSettings();
-        toast('已删除分类');
+        toast('已删除模块');
         break;
       }
 
@@ -1032,12 +1165,20 @@
       }
 
       case 'clear-all': {
-        if (!confirm('清空全部数据？这个操作不可撤销。建议先导出备份。')) return;
+        if (!confirm('清空全部任务、模块和统计？不可撤销，建议先导出备份。\n\nAI 配置（Key、地址、模型、周报规则）会保留。')) return;
         if (!confirm('真的要清空吗？')) return;
+        const keep = await getSettings();          // 先记下配置，清空后原样写回，避免误删 Key
         await clearAll();
+        await saveSettings({
+          apiKey: keep.apiKey,
+          aiBaseUrl: keep.aiBaseUrl,
+          aiModel: keep.aiModel,
+          reportTemplate: keep.reportTemplate,
+          theme: keep.theme,
+        });
         closeModal();
         await refresh();
-        toast('已清空');
+        toast('已清空，AI 配置已保留');
         break;
       }
 

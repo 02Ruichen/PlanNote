@@ -341,8 +341,8 @@ select.field { cursor: pointer; appearance: none;
 .quick-add .btn.quiet .lbl { display: inline; }
 @media (max-width: 680px) {
   .quick-add { padding-left: 13px; gap: 6px; }
-  .quick-add .btn.quiet { padding: 0 8px; }
-  .quick-add .btn.quiet .lbl { display: none; }
+  .quick-add .btn.quiet { padding: 0 9px; font-size: 12px; }
+  .quick-add .btn.quiet .lbl { display: inline; }
 }
 [data-theme="dark"] .quick-add .btn.quiet:hover { background: rgba(255, 255, 255, .06); }
 
@@ -479,7 +479,10 @@ select.field { cursor: pointer; appearance: none;
   letter-spacing: .01em;
 }
 .week-foot b { color: var(--text-2); font-weight: 600; font-variant-numeric: tabular-nums; }
-.week-empty { font-size: 11px; color: var(--muted); text-align: center; padding: 14px 0; opacity: .7; }
+.week-empty {
+  font-size: 10.5px; line-height: 1.6; color: var(--muted);
+  text-align: center; padding: 14px 4px; opacity: .72;
+}
 
 /* ============================================================
    月视图
@@ -803,4 +806,122 @@ select.field { cursor: pointer; appearance: none;
   .field-2 { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
   .task-actions { opacity: 1; }
+}
+
+/* ============================================================
+   模块筛选 · 明确按钮 · 周报规则面板
+   ============================================================ */
+
+/* ---------- 日视图顶部：模块筛选条 ---------- */
+.mod-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: var(--s3);
+}
+.mod-cap {
+  font-size: 11px; letter-spacing: .1em; font-weight: 700;
+  color: var(--muted); margin-right: 2px;
+}
+.mod-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: var(--r-pill);
+  background: var(--card); border: 1px solid var(--border-soft);
+  font-size: 12.5px; font-weight: 500; color: var(--text-2);
+  transition: all .16s ease;
+}
+.mod-chip b {
+  font-size: 10.5px; font-weight: 600; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.mod-chip svg { width: 13px; height: 13px; opacity: .8; }
+.mod-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c, var(--accent)); flex: none; }
+.mod-chip:hover {
+  color: var(--text); border-color: rgba(168, 152, 184, .5);
+  transform: translateY(-1px);
+}
+.mod-chip.on {
+  background: rgba(168, 152, 184, .17);
+  border-color: rgba(168, 152, 184, .45);
+  color: var(--accent-text); font-weight: 600;
+  box-shadow: 0 2px 10px rgba(168, 152, 184, .16);
+}
+.mod-chip.on b { color: var(--accent-text); opacity: .8; }
+.mod-chip.ghost { background: transparent; border-style: dashed; color: var(--muted); }
+.mod-chip.ghost:hover {
+  color: var(--accent-text); background: rgba(168, 152, 184, .07);
+  border-color: rgba(168, 152, 184, .55);
+}
+[data-theme="dark"] .mod-chip { background: rgba(255, 255, 255, .04); }
+[data-theme="dark"] .mod-chip.on { background: rgba(184, 168, 200, .18); color: #D6C8E2; }
+[data-theme="dark"] .mod-chip.on b { color: #D6C8E2; }
+
+/* ---------- 添加栏：明确写字的按钮 ---------- */
+.quick-add .add-btn {
+  height: 38px; padding: 0 15px; flex: none; gap: 6px; font-size: 13px;
+}
+.quick-add .add-btn svg { width: 15px; height: 15px; }
+.quick-add .btn.quiet { gap: 5px; }
+
+/* ---------- 周报规则 / 模板 ---------- */
+.rule-card {
+  background: var(--card); border: 1px solid var(--border-soft);
+  border-radius: 14px; margin-bottom: var(--s4); max-width: 840px;
+  overflow: hidden; transition: box-shadow .2s, border-color .2s;
+}
+.rule-card.open { box-shadow: var(--sh-1); }
+.rule-head {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 13px 16px; text-align: left;
+}
+.rule-ico { display: grid; place-items: center; color: var(--accent-text); flex: none; }
+.rule-ico svg { width: 16px; height: 16px; }
+.rule-title { font-size: 13px; font-weight: 600; color: var(--text); flex: none; }
+.rule-state { font-size: 11.5px; color: var(--muted); }
+.rule-state.on { color: #5F7560; }
+[data-theme="dark"] .rule-state.on { color: #9FBEA0; }
+.rule-chev {
+  margin-left: auto; display: grid; place-items: center;
+  color: var(--muted); transition: transform .2s ease; flex: none;
+}
+.rule-chev svg { width: 15px; height: 15px; }
+.rule-card.open .rule-chev { transform: rotate(180deg); }
+
+.rule-body { padding: 0 16px 16px; }
+.rule-in {
+  width: 100%; min-height: 132px; resize: vertical;
+  border: 1px solid var(--border); border-radius: var(--r-input);
+  background: var(--bg); padding: 12px 14px;
+  font-family: var(--font); font-size: 12.5px; line-height: 1.75;
+  color: var(--text); transition: border-color .16s, background .16s;
+}
+.rule-in::placeholder { color: var(--muted); }
+.rule-in:focus { outline: none; border-color: var(--accent); background: var(--card); }
+.rule-foot {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px; flex-wrap: wrap;
+}
+.rule-tip { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* ---------- 设置里模块的小数字 ---------- */
+.cat-num {
+  font-size: 11px; color: var(--muted); min-width: 20px;
+  text-align: right; font-variant-numeric: tabular-nums; flex: none;
+}
+.cat-count { font-size: 11px; color: var(--muted); }
+
+@media (max-width: 680px) {
+  .mod-bar {
+    flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px;
+    scrollbar-width: none; margin-right: -16px; padding-right: 16px;
+  }
+  .mod-bar::-webkit-scrollbar { display: none; }
+  .mod-bar {
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent);
+  }
+  .mod-cap { display: none; }
+  .mod-chip { flex: none; }
+  .rule-state { display: none; }
+  .rule-head { padding: 12px 14px; }
+  .rule-body { padding: 0 14px 14px; }
+  .quick-add .add-btn { padding: 0 12px; }
 }

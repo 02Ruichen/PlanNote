@@ -168,7 +168,7 @@ function saveCategory(cat) {
 
 async function deleteCategory(id) {
   const cats = await getCategories();
-  if (cats.length <= 1) throw new Error('至少要保留一个分类');
+  if (cats.length <= 1) throw new Error('至少要保留一个模块');
   await dbDelete(STORE_CATS, id);
   const rest = cats.filter(c => c.id !== id);
   const fallback = rest[0];
@@ -250,6 +250,7 @@ const DEFAULT_SETTINGS = {
   aiBaseUrl: 'https://api.deepseek.com',
   apiKey: '',
   aiModel: 'deepseek-chat',
+  reportTemplate: '',      // 周报规则 / 模板：生成时作为硬性格式要求
   weekStart: 1,
   lastBackupAt: null,
 };
