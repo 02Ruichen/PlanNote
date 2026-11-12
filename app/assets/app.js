@@ -59,6 +59,8 @@
     reportError: null,
     quickCat: null,
     catFilter: '',      // 模块筛选，'' = 全部
+    reportCat: '',      // 周报范围：'' = 全部模块，否则只统计该模块
+    reportCache: {},    // 已生成的周报，按「周|范围」缓存
     ruleOpen: false,    // 周报规则面板是否展开
   };
 
@@ -455,8 +457,15 @@
     const ready = isConfigured(state.settings);
     const modelName = (state.settings.aiModel || 'deepseek-chat').trim();
 
-    const has = state.report && state.report.weekStart === weekStart;
-    const count = state.plans.filter(p => p.plan_date >= weekStart && p.plan_date <= end).length;
+    const weekPlans = state.plans.filter(p => p.plan_date >= weekStart && p.plan_date <= end);
+    const scope = state.reportCat ? catOf(state.reportCat) : null;
+    const count = scope ? weekPlans.filter(p => p.category_id === scope.id).length : weekPlans.length;
+    const scopeName = scope ? scope.name : '全部模块';
+
+    // 每份周报按「周 + 范围」分开存，切换模块看不会冲掉已经生成的那份
+    const cacheKey = `${weekStart}|${state.reportCat || ''}`;
+    const cached = (state.reportCache || {})[cacheKey] || null;
+    const has = !!cached;
 
     let body;
     if (!ready) {
@@ -484,7 +493,7 @@
       </div></div>`;
     } else if (has) {
       body = `<div class="card pad report-card">
-        <div class="report-body">${renderMarkdown(state.report.text)}</div>
+        <div class="report-body">${renderMarkdown(cached.text)}</div>
       </div>
       <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
         <button class="btn soft" data-action="copy-report">${I.copy}复制全文</button>
@@ -494,7 +503,9 @@
     } else {
       body = `<div class="card pad report-card"><div class="empty" style="padding:52px 0">
         <div class="empty-ico">${I.report}</div>
-        <div class="empty-title">${count ? `这一周有 ${count} 条记录` : '这一周还没有记录'}</div>
+        <div class="empty-title">${count
+          ? (scope ? `「${escapeHtml(scopeName)}」这一周有 ${count} 条记录` : `这一周有 ${count} 条记录`)
+          : (scope ? `「${escapeHtml(scopeName)}」这一周还没有记录` : '这一周还没有记录')}</div>
         <div class="empty-sub">${count ? '点下面的按钮，让 AI 把它梳理成一份周报' : '先去记几件事，回来再生成'}</div>
         <button class="btn primary" data-action="gen-report" style="margin-top:18px">${I.spark}生成周报</button>
       </div></div>`;
@@ -523,12 +534,30 @@
         </div>` : ''}
       </div>`;
 
+    const weekCounts = {};
+    for (const p of weekPlans) weekCounts[p.category_id] = (weekCounts[p.category_id] || 0) + 1;
+
+    const scopeRow = `
+      <div class="mod-bar report-scope">
+        <span class="mod-cap">周报范围</span>
+        <button class="mod-chip ${state.reportCat ? '' : 'on'}" data-action="report-cat" data-id="">
+          ${I.grid}<span>全部模块</span><b>${weekPlans.length}</b>
+        </button>
+        ${state.categories.map(c => `
+          <button class="mod-chip ${state.reportCat === c.id ? 'on' : ''}" data-action="report-cat" data-id="${c.id}"
+                  title="只统计「${escapeHtml(c.name)}」这个模块的记录">
+            <span class="dot" style="--c:${c.color}"></span><span>${escapeHtml(c.name)}</span>${weekCounts[c.id] ? `<b>${weekCounts[c.id]}</b>` : ''}
+          </button>`).join('')}
+        <span class="scope-note">${scope ? `本次只写「${escapeHtml(scopeName)}」` : '全部模块一起写'}</span>
+      </div>`;
+
     return `
       <div class="report-toolbar">
         <span class="mode-pill ${ready ? 'live' : ''}">${ready ? '已接入 · ' + escapeHtml(modelName) : '未接入 AI'}</span>
         <span style="font-size:12.5px;color:var(--muted)">${fmtMD(weekStart)} — ${fmtMD(end)}</span>
         ${ready ? `<button class="btn quiet sm" data-action="settings" style="margin-left:auto">${I.settings}AI 设置</button>` : ''}
       </div>
+      ${scopeRow}
       ${ruleCard}
       ${body}`;
   }
@@ -815,7 +844,10 @@
   async function generateReport() {
     const weekStart = weekStartOf(state.date, state.settings.weekStart || 1);
     const { end } = weekRangeOf(state.date, state.settings.weekStart || 1);
-    const plans = state.plans.filter(p => p.plan_date >= weekStart && p.plan_date <= end);
+    const scope = state.reportCat ? catOf(state.reportCat) : null;
+    const plans = state.plans
+      .filter(p => p.plan_date >= weekStart && p.plan_date <= end)
+      .filter(p => !scope || p.category_id === scope.id);
 
     if (!isConfigured(state.settings)) {
       toast('还没接入 AI，先填一个 API Key', 2600);
@@ -823,7 +855,7 @@
       return;
     }
     if (!plans.length) {
-      toast('这一周还没有记录，先去记两件事', 2600);
+      toast(scope ? `「${scope.name}」这一周还没有记录` : '这一周还没有记录，先去记两件事', 2600);
       return;
     }
 
@@ -842,9 +874,12 @@
           start: weekStart,
           end,
           template: state.settings.reportTemplate || '',
+          scopeName: scope ? scope.name : '',
         }),
       });
-      state.report = { weekStart, end, text, at: Date.now(), model: state.settings.aiModel };
+      const cat = state.reportCat || '';
+      state.report = { weekStart, end, cat, text, at: Date.now(), model: state.settings.aiModel };
+      state.reportCache[`${weekStart}|${cat}`] = state.report;
       toast('周报已生成');
     } catch (err) {
       console.error(err);
@@ -856,9 +891,18 @@
     }
   }
 
+  function currentReport() {
+    const weekStart = weekStartOf(state.date, state.settings.weekStart || 1);
+    return {
+      weekStart,
+      report: (state.reportCache || {})[`${weekStart}|${state.reportCat || ''}`] || null,
+    };
+  }
+
   function downloadReport() {
-    if (!state.report) return;
-    const { weekStart, end, text } = state.report;
+    const { report } = currentReport();
+    if (!report) return;
+    const { weekStart, end, text } = report;
     const name = `PlanNote周报_${weekStart}_${end}.md`;
     downloadFile(name, text, 'text/markdown;charset=utf-8');
     toast('已下载');
@@ -927,6 +971,13 @@
 
       case 'filter-cat': {
         state.catFilter = t.dataset.id || '';
+        renderContent();
+        break;
+      }
+
+      case 'report-cat': {
+        state.reportCat = t.dataset.id || '';
+        state.reportError = null;
         renderContent();
         break;
       }
@@ -1126,6 +1177,7 @@
         const c = state.categories.find(x => x.id === t.dataset.id);
         if (!confirm(`删除模块「${c.name}」？这个模块里的任务会归到第一个模块，不会丢。`)) return;
         await deleteCategory(t.dataset.id);
+        if (state.reportCat === t.dataset.id) state.reportCat = '';
         await refresh();
         openSettings();
         toast('已删除模块');
@@ -1187,9 +1239,10 @@
         break;
 
       case 'copy-report': {
-        if (!state.report) return;
+        const { report } = currentReport();
+        if (!report) return;
         try {
-          await navigator.clipboard.writeText(state.report.text);
+          await navigator.clipboard.writeText(report.text);
           toast('已复制到剪贴板');
         } catch {
           toast('复制失败，请手动选择文本');

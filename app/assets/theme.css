@@ -854,6 +854,13 @@ select.field { cursor: pointer; appearance: none;
 [data-theme="dark"] .mod-chip.on { background: rgba(184, 168, 200, .18); color: #D6C8E2; }
 [data-theme="dark"] .mod-chip.on b { color: #D6C8E2; }
 
+/* ---------- 周报：范围选择 ---------- */
+.report-scope { margin-bottom: var(--s2); }
+.report-scope .scope-note {
+  font-size: 11.5px; color: var(--muted);
+  margin-left: 2px; padding-left: 10px; border-left: 1px solid var(--border-soft);
+}
+
 /* ---------- 添加栏：明确写字的按钮 ---------- */
 .quick-add .add-btn {
   height: 38px; padding: 0 15px; flex: none; gap: 6px; font-size: 13px;

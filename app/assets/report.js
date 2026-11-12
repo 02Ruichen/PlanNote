@@ -98,7 +98,7 @@ async function testAI({ baseUrl, apiKey, model }) {
 
 /* ---------------- 提示词 ---------------- */
 
-function buildPrompt({ plans, categories, start, end, template }) {
+function buildPrompt({ plans, categories, start, end, template, scopeName }) {
   const cats = Object.fromEntries(categories.map(c => [c.id, c.name]));
   const rows = plans.map(p => {
     const t = p.start_time ? `${p.start_time}${p.end_time ? '-' + p.end_time : ''} ` : '';
@@ -119,10 +119,15 @@ ${rule}
 规则结束>>>
 ` : '';
 
+  const scope = String(scopeName || '').trim();
+  const scopeBlock = scope
+    ? `范围：只统计「${scope}」这一个模块。其它模块的记录不在本次范围内，不要提及、不要计入统计。`
+    : '';
+
   return `请根据下面这一周的任务记录，写一份中文周报。
 ${ruleBlock}
 周期：${start} 至 ${end}
-共 ${plans.length} 条记录。
+${scopeBlock ? scopeBlock + '\n' : ''}共 ${plans.length} 条记录。
 
 记录明细：
 ${rows || '（本周无记录）'}
