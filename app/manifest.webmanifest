@@ -1,0 +1,23 @@
+{
+  "name": "PlanNote · 极简个人计划管理",
+  "short_name": "PlanNote",
+  "description": "记录每天要做的事，周末自动生成周报。莫兰迪质感，数据留在你自己的设备上。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F2EFEC",
+  "theme_color": "#F2EFEC",
+  "lang": "zh-CN",
+  "categories": ["productivity", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "今天的计划", "short_name": "今天", "url": "./index.html" },
+    { "name": "AI 周报", "short_name": "周报", "url": "./index.html?view=report" }
+  ]
+}
