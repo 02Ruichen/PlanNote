@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PlanNote · 每天随手记一句，周五它替你写完周报</title>
-<meta name="description" content="PlanNote 是一个给上班族用的个人计划管理工具：随手记下每天做的事，周末按你公司的格式自动生成周报。纯前端，数据只存在你自己的设备上。">
+<title>PlanNote · 每天记一句，周五我就不用写周报了</title>
+<meta name="description" content="一个自己做的个人计划本：每天记一句做完的事，周五按你公司的格式生成周报。纯前端，不用注册，数据只存在你自己的浏览器里。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="PlanNote · 随手记，周末自动写周报">
-<meta property="og:description" content="给要交周报的上班族。纯前端，无需注册，数据留在本机。">
+<meta property="og:title" content="PlanNote · 周五我就不用写周报了">
+<meta property="og:description" content="自己做的个人计划本，每天记一句，周五出周报。数据只存在你自己的设备上。">
 <meta property="og:image" content="./shots/shot-day.png">
 <meta name="theme-color" content="#F2EFEC">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -27,10 +27,11 @@
       </span>
     </a>
     <nav class="lp-links">
-      <a href="#why">为什么</a>
+      <a href="#why">为什么做</a>
+      <a href="#idea">它是什么</a>
       <a href="#how">怎么用</a>
       <a href="#sample">周报样例</a>
-      <a href="#choices">设计取舍</a>
+      <a href="#choices">取舍</a>
     </nav>
     <a class="lp-btn primary" href="./app.html">打开应用</a>
   </div>
@@ -40,83 +41,108 @@
 
   <section class="lp-hero">
     <div class="lp-wrap">
-      <p class="lp-kicker">个人计划管理 · 纯前端 · 数据留在本机</p>
-      <h1>每天随手记一句，<br>周五它替你写完周报。</h1>
+      <p class="lp-kicker">个人计划本 · 纯前端 · 不联网也能记</p>
+      <h1>每天记一句，<br>周五我就不用写周报了。</h1>
       <p class="lp-lead">
-        给要交日报、周报的上班族。不用注册、不用安装，
-        记下的每件事只存在你自己的设备上。
+        这是我给自己做的计划本，记的时候一条就一句话。到周五，它把这一周理成一份周报，
+        格式按你们公司那套来。不过没有账号，也不用注册，写下来的东西只存在你自己的浏览器里，我这边看不到。
       </p>
       <div class="lp-actions">
         <a class="lp-btn primary lg" href="./app.html">打开应用</a>
         <a class="lp-btn ghost lg" href="#sample">先看一份周报</a>
       </div>
-      <p class="lp-fine">无需登录 · 可装到桌面和手机 · 断网也能记</p>
+      <p class="lp-fine">不用登录 · 能装到桌面和手机 · 断网照记</p>
     </div>
     <div class="lp-wrap">
       <figure class="lp-shot rise">
-        <img src="./shots/shot-day.png" alt="PlanNote 今日视图：按模块分组的任务列表，顶部可切换模块筛选" width="1280" height="800" loading="eager">
+        <img src="./shots/shot-day.png" alt="今日视图：按模块分组的任务列表，顶部可以按模块筛选" width="1280" height="800" loading="eager">
       </figure>
     </div>
   </section>
 
   <section class="lp-section" id="why">
     <div class="lp-wrap">
-      <h2>写不出周报，往往不是因为不会写</h2>
-      <p class="lp-sub">打开文档那一刻，真正卡住的是另一件事。</p>
+      <h2>真正卡住的好像不是写，是想不起来这一周干了什么。</h2>
+      <p class="lp-sub">打开文档，光标闪半天，脑子里一片空白，然后开始翻聊天记录，找自己到底说过什么。</p>
       <div class="lp-grid three">
         <article class="lp-card rise">
           <span class="lp-num">01</span>
           <h3>想不起做过什么</h3>
-          <p>一周过去，具体交付了什么全靠翻聊天记录和邮件找线索，最后只能写「推进了若干事项」。</p>
+          <p>一周五天，记得清楚的往往只有周一和今天。剩下的要去翻群聊、翻邮件、翻自己发过的文件，翻完其实还是拼不出完整的一件事。</p>
         </article>
         <article class="lp-card rise">
           <span class="lp-num">02</span>
           <h3>素材散在五个地方</h3>
-          <p>待办在备忘录，结果在群里，花了多久只有自己知道。拼起来要半小时，写出来只剩三行。</p>
+          <p>待办在备忘录，结果在群里，到底花了多久只有我自己知道。凑一次要半小时，写出来三行。</p>
         </article>
         <article class="lp-card rise">
           <span class="lp-num">03</span>
           <h3>写出来像套话</h3>
-          <p>「积极推进」「持续跟进」，这类词领导一眼看得出是在凑字数，反而扣分。</p>
+          <p>「积极推进」「持续跟进」「高度重视」，这些词不是不会写，是写出来我自己都不太信。看的人大概也看得出来。</p>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-concept" id="idea">
+    <div class="lp-wrap">
+      <h2>它不管人，只负责把事留下来。</h2>
+      <div class="lp-essay">
+        <p>
+          大部分计划工具想帮你自律：提醒、打卡、完成率、连续几天。这些它一样都不做。
+          它更像一个放原料的地方，今天做了什么，顺手丢一句进去，不用分类也不用打分，等周五再一起处理。
+        </p>
+        <p>
+          所以它的第一条原则是，记一条不能比发一条消息更麻烦。打开就是今天，输入框就在那儿，
+          一句话按回车就完事，模块和优先级想不起来就空着，之后再补。剩下的都压到周五那一次去解决。
+        </p>
+        <p>
+          这个想法其实是被逼出来的。最早它是 Python 写的桌面版，只能在自己电脑上开，
+          想在工位记一句得先回去开电脑，用起来就不顺手。搬到网页之后才真的能用起来，
+          顺带把功能删掉了一批，没有项目管理，没有多人协作，也没有甘特图。
+        </p>
+        <p>
+          它也不要求你每天都记。有时候一天下来什么都不想写，就空着，第二天补一句。
+          不弹窗催，也不去算你断了几天打卡，这大概就是我要的东西：一个不催人的本子。
+        </p>
       </div>
     </div>
   </section>
 
   <section class="lp-section" id="how">
     <div class="lp-wrap">
-      <h2>它只做三件事，每件都做到底</h2>
-      <p class="lp-sub">没有项目管理、没有团队协作、没有甘特图。就是一个人的计划本。</p>
+      <h2>它只做三件事：记、写、存。</h2>
+      <p class="lp-sub">没有项目管理，没有多人协作，也没有甘特图。三个视图读的是同一批数据，不做二次录入。</p>
 
       <div class="lp-feature rise">
         <div class="lp-feature-text">
           <span class="lp-step">01 · 记</span>
-          <h3>一条回车就够</h3>
-          <p>只写一句话也能存下，模块、优先级、时间都可以之后补。日、周、月三个视角看的是同一批数据，不用重复录入。</p>
+          <h3>一句话也能存下</h3>
+          <p>只写一句话也可以保存，模块、优先级、时间都支持之后补填。日、周、月三个视图读取同一批数据，不需要重复录入。</p>
           <ul class="lp-list">
-            <li>模块可以自己建，和工作、学习、生活同一层级</li>
-            <li>按模块筛选，只看一个项目这周推进到哪</li>
-            <li>完成的打勾，进度条当天就更新</li>
+            <li>模块可以自己建，和工作、学习、生活同级</li>
+            <li>按模块筛选，只看某一个项目的当周进度</li>
+            <li>完成后打勾，当天的进度条随之更新</li>
           </ul>
         </div>
         <figure class="lp-feature-shot">
-          <img src="./shots/shot-week.png" alt="周视图：一列七天，按天排布当周任务" width="1280" height="800" loading="lazy">
+          <img src="./shots/shot-week.png" alt="周视图：一列七天，当周任务按天排开" width="1280" height="800" loading="lazy">
         </figure>
       </div>
 
       <div class="lp-feature reverse rise">
         <div class="lp-feature-text">
           <span class="lp-step">02 · 写</span>
-          <h3>按你公司的格式写</h3>
-          <p>把公司模板、格式要求、历史样例粘进「周报规则」，生成时它优先于默认结构。标题、小节、落款都照你的来，不用每次手动改。</p>
+          <h3>按公司的格式输出</h3>
+          <p>把公司模板、格式要求或历史样例粘进「周报规则」，生成时优先于默认结构。标题、小节、落款按规则输出，不需要每次手动修改。</p>
           <ul class="lp-list">
-            <li>规则会用分隔符显式包起来，并声明冲突时以它为准</li>
-            <li>可以只给某一个项目出周报，其它模块不计入</li>
-            <li>生成结果能复制、能下载成 .md</li>
+            <li>规则以分隔符显式包裹，并声明冲突时以其为准</li>
+            <li>可只针对某一个项目生成，其它模块不计入</li>
+            <li>结果可复制，也可下载为 .md</li>
           </ul>
         </div>
         <figure class="lp-feature-shot">
-          <img src="./shots/shot-rule.png" alt="周报规则面板：把公司模板粘进去，生成时会原样发给模型并优先于默认格式" width="1280" height="1040" loading="lazy">
+          <img src="./shots/shot-rule.png" alt="周报规则面板：把公司模板粘进去，生成时会原样发给模型，并优先于默认格式" width="1280" height="1040" loading="lazy">
         </figure>
       </div>
 
@@ -124,11 +150,11 @@
         <div class="lp-feature-text">
           <span class="lp-step">03 · 存</span>
           <h3>不经过任何服务器</h3>
-          <p>没有账号系统，没有云端数据库。记录存在浏览器的本地数据库里，别人打不开，我也拿不到。</p>
+          <p>没有账号系统，也没有云端数据库。记录保存在浏览器的本地数据库中，换一个浏览器或换一台设备打开，看到的是空数据。</p>
           <ul class="lp-list">
-            <li>换设备时导出成文件搬过去，导入即恢复</li>
-            <li>支持深色模式，晚上看不刺眼</li>
-            <li>断网照样能记，联网后不影响任何已有记录</li>
+            <li>换设备时导出为文件，导入即恢复</li>
+            <li>支持深色模式</li>
+            <li>断网可继续记录，联网后已有记录不受影响</li>
           </ul>
         </div>
         <figure class="lp-feature-shot portrait">
@@ -140,18 +166,18 @@
 
   <section class="lp-section sample" id="sample">
     <div class="lp-wrap">
-      <h2>这是它写出来的周报</h2>
+      <h2>下面这份不是我编的样例。</h2>
       <p class="lp-sub">
-        下面这份由真实模型生成，只把任务记录喂了进去，没有做人工修改。
-        换到你手上，内容会是你自己那一周的事。
+        真实接口跑出来的，喂进去的只有九条任务记录，一个字没改。
+        整齐得有点出乎我意料，但也有几处读着还是像机器写的，我没有去润色。
       </p>
       <figure class="lp-shot big rise">
         <img src="./shots/shot-report.png" alt="生成的周报正文：本周概览、精力分配、完成质量、下周建议四个小节" width="1280" height="1040" loading="lazy">
       </figure>
-      <p class="lp-zoom-tip">手机上可左右滑动，看完整周报</p>
+      <p class="lp-zoom-tip">手机上可以左右滑动，看完整份</p>
       <p class="lp-note">
-        AI 周报需要填一个自己的 API Key（支持 OpenAI 兼容接口）。
-        其余功能——记录、视图、统计、备份——开箱可用，不需要联网。
+        AI 周报要填一个你自己的 API Key（OpenAI 兼容的接口都行）。
+        剩下那些，记录、视图、统计、备份，打开就能用，不用联网。
       </p>
     </div>
   </section>
@@ -159,27 +185,27 @@
   <section class="lp-section" id="choices">
     <div class="lp-wrap narrow">
       <h2>几个刻意的选择</h2>
-      <p class="lp-sub">这部分是给同行看的：为什么这么做，以及代价是什么。</p>
+      <p class="lp-sub">这部分大概只有同行会看：为什么这么选，代价是什么。</p>
       <ol class="lp-choices">
         <li class="rise">
           <b>不做后端。</b>
-          计划数据是很私人的东西，存本地能省掉用户的信任成本，也省掉我维护一台服务器的成本。
-          代价是跨设备要手动导出——这个代价我认为值得。
+          计划数据挺私人的，存本地能省掉一层信任成本，也省掉我养一台服务器。
+          代价是换设备得自己导出，这个代价我认。
         </li>
         <li class="rise">
-          <b>用 IndexedDB，而不是 localStorage。</b>
-          周、月视图要按日期范围聚合查询，localStorage 只适合存小配置。
-          同时保留了 file:// 打开时的降级路径，双击就能用。
+          <b>用 IndexedDB，没用 localStorage。</b>
+          周和月要按日期范围聚合查询，localStorage 只适合放小配置。
+          不过直接双击文件打开的时候，它得退回 localStorage 才能跑，这条路我没舍得砍掉。
         </li>
         <li class="rise">
           <b>把规则放在提示词最前面。</b>
-          模型对靠前的约束更敏感，所以规则块用显式分隔符包起来、排在通用要求之前，
-          并写明「冲突时以它为准」。这是规则能真正生效的关键。
+          模型对靠前的约束更敏感，所以规则块用分隔符包起来、排在通用要求之前，
+          还写明冲突时以它为准。这一条到底有没有用，我拿真实接口验过才算数。
         </li>
         <li class="rise">
-          <b>为周报写了 45 项自动化测试。</b>
-          周报是这个应用的核心价值，靠手点验不住。测试会抓真实发出的请求体，
-          确认范围限定只带了指定模块的记录、规则原文完整进入了提示词。
+          <b>为周报写了四十几项自动化测试。</b>
+          周报是这东西最要紧的一环，靠手点验不住。测试会抓真实发出去的请求体，
+          确认限定范围时只带了那个模块的记录、规则原文完整进了提示词。
         </li>
       </ol>
     </div>
@@ -187,13 +213,13 @@
 
   <section class="lp-cta">
     <div class="lp-wrap">
-      <h2>现在就能用</h2>
-      <p>打开即用，不需要注册。数据从第一条记录开始，就只属于你。</p>
+      <h2>不用等它做完，现在就能用。</h2>
+      <p>打开就记，不用注册。功能是够用的，离我心里的样子还差一点，我大概会接着慢慢改。</p>
       <div class="lp-actions center">
         <a class="lp-btn primary lg" href="./app.html">打开应用</a>
         <a class="lp-btn ghost lg" href="https://github.com/02Ruichen/PlanNote" target="_blank" rel="noopener">看源码</a>
       </div>
-      <p class="lp-fine">AI 周报需要你自己的 API Key · 其余功能开箱可用</p>
+      <p class="lp-fine">AI 周报要你自己的 API Key · 其余打开就能用</p>
     </div>
   </section>
 
@@ -201,8 +227,8 @@
 
 <footer class="lp-footer">
   <div class="lp-wrap lp-footer-inner">
-    <span>PlanNote · 个人计划管理</span>
-    <span>MIT License · 数据存储在你自己的设备上</span>
+    <span>PlanNote · 个人计划本</span>
+    <span>MIT License · 数据存在你自己的设备上</span>
   </div>
 </footer>
 

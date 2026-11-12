@@ -49,6 +49,10 @@ a { color: inherit; text-decoration: none; }
 
 h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -.012em; }
 
+/* 中文断行：标题两行尽量等长，正文避免末行只剩一两个字 */
+h2 { text-wrap: balance; }
+p { text-wrap: pretty; }
+
 p { margin: 0; }
 
 .lp-wrap {
@@ -207,6 +211,29 @@ p { margin: 0; }
 }
 .lp-card h3 { font-size: 16.5px; margin-bottom: 8px; }
 .lp-card p { font-size: 14px; color: var(--body); line-height: 1.75; }
+
+/* ---------------- 概念说明（作者口吻，一处左侧竖线标记） ---------------- */
+
+.lp-concept { padding: 100px 0 0; }
+.lp-concept .lp-wrap { max-width: 720px; }
+.lp-concept h2 {
+  font-size: clamp(20px, 2.4vw, 25px);
+  line-height: 1.5;
+  max-width: 20em;
+}
+.lp-essay {
+  margin-top: 28px;
+  padding-left: 24px;
+  border-left: 2px solid var(--border);
+}
+.lp-essay p { font-size: 15.5px; line-height: 1.95; color: var(--body); }
+.lp-essay p + p { margin-top: 18px; }
+
+@media (max-width: 900px) {
+  .lp-concept { padding-top: 78px; }
+  .lp-essay { padding-left: 18px; }
+  .lp-essay p { font-size: 15px; line-height: 1.9; }
+}
 
 /* ---------------- 功能分块 ---------------- */
 
