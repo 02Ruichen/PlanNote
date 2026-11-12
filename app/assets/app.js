@@ -28,6 +28,11 @@
     spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/></svg>',
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.5l3.5 2"/></svg>',
     chevD: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+    sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.1"/><circle cx="9" cy="17" r="2.1"/></svg>',
+    enter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v6.5a3 3 0 01-3 3H5"/><path d="M9 10l-4.5 4.5L9 19"/></svg>',
+    eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>',
+    key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l8.5-8.5M17 5.5l2 2M14.5 8l2 2"/></svg>',
+    alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><circle cx="12" cy="16.6" r=".9" fill="currentColor" stroke="none"/></svg>',
   };
 
   const NAV = [
@@ -50,6 +55,7 @@
     report: null,
     reportWeek: null,
     reportLoading: false,
+    reportError: null,
     quickCat: null,
   };
 
@@ -162,7 +168,8 @@
         <button class="icon-btn" data-action="next" title="下一周">${I.right}</button>`;
     }
 
-    const newBtn = ['day', 'week', 'month'].includes(state.view)
+    // 日视图的添加入口就是页面里那一行输入框，顶栏不再放「新建」，避免两个入口打对台
+    const newBtn = ['week', 'month'].includes(state.view)
       ? `<button class="btn primary" data-action="new">${I.plus}新建</button>` : '';
 
     tb.innerHTML = `<div class="topbar-title">${title}</div>${actions}${newBtn}`;
@@ -194,7 +201,7 @@
       <div class="empty">
         <div class="empty-ico">${I.inbox}</div>
         <div class="empty-title">这一天还是空白的</div>
-        <div class="empty-sub">在上面写一句要做的事，回车就好</div>
+        <div class="empty-sub">在上面写一句，回车就记下；想加时间或分类，点「详细」</div>
       </div>`;
 
     return `
@@ -211,8 +218,9 @@
       </div>
 
       <div class="quick-add">
-        <input id="quick-input" type="text" placeholder="今天要做点什么？回车添加…" autocomplete="off">
-        <button class="btn primary" data-action="quick-add">${I.plus}添加</button>
+        <input id="quick-input" type="text" placeholder="今天要做点什么？" autocomplete="off">
+        <button class="btn quiet sm" data-action="quick-detail" title="补充时间、分类、难度">${I.sliders}<span class="lbl">详细</span></button>
+        <button class="btn primary quick-go" data-action="quick-add" title="记下这一条（回车）">${I.enter}</button>
       </div>
 
       ${list}`;
@@ -396,17 +404,35 @@
   function viewReport() {
     const weekStart = weekStartOf(state.date, state.settings.weekStart || 1);
     const { end } = weekRangeOf(state.date, state.settings.weekStart || 1);
-    const mode = state.settings.aiMode || 'demo';
-    const modeText = { demo: '演示模式 · 本地生成', proxy: '代理模式 · 真 AI', key: '自带 Key · 真 AI' }[mode];
+    const ready = isConfigured(state.settings);
+    const modelName = (state.settings.aiModel || 'deepseek-chat').trim();
 
     const has = state.report && state.report.weekStart === weekStart;
+    const count = state.plans.filter(p => p.plan_date >= weekStart && p.plan_date <= end).length;
 
     let body;
-    if (state.reportLoading) {
-      body = `<div class="card pad"><div class="empty" style="padding:52px 0">
+    if (!ready) {
+      body = `<div class="card pad report-card"><div class="empty" style="padding:46px 0">
+        <div class="empty-ico">${I.key}</div>
+        <div class="empty-title">先接入 AI，周报才有人写</div>
+        <div class="empty-sub">填一个 API Key 就行，Key 只存在这台设备里，不会上传到任何地方</div>
+        <button class="btn primary" data-action="settings" style="margin-top:18px">${I.key}去接入</button>
+      </div></div>`;
+    } else if (state.reportLoading) {
+      body = `<div class="card pad report-card"><div class="empty" style="padding:52px 0">
         <div class="empty-ico">${I.spark}</div>
         <div class="empty-title">正在读你这一周的记录…</div>
-        <div class="empty-sub">大概几秒钟</div>
+        <div class="empty-sub">大概十几秒</div>
+      </div></div>`;
+    } else if (state.reportError) {
+      body = `<div class="card pad report-card"><div class="empty" style="padding:40px 28px">
+        <div class="empty-ico err">${I.alert}</div>
+        <div class="empty-title">这次没生成成功</div>
+        <div class="empty-sub">${escapeHtml(state.reportError)}</div>
+        <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;justify-content:center">
+          <button class="btn primary" data-action="gen-report">${I.spark}再试一次</button>
+          <button class="btn ghost" data-action="settings">${I.settings}检查设置</button>
+        </div>
       </div></div>`;
     } else if (has) {
       body = `<div class="card pad report-card">
@@ -418,28 +444,28 @@
         <button class="btn ghost" data-action="gen-report">${I.spark}重新生成</button>
       </div>`;
     } else {
-      const count = state.plans.filter(p => p.plan_date >= weekStart && p.plan_date <= end).length;
       body = `<div class="card pad report-card"><div class="empty" style="padding:52px 0">
         <div class="empty-ico">${I.report}</div>
         <div class="empty-title">${count ? `这一周有 ${count} 条记录` : '这一周还没有记录'}</div>
-        <div class="empty-sub">${count ? '点下面的按钮，把它梳理成一份周报' : '先去记几件事，回来再生成'}</div>
+        <div class="empty-sub">${count ? '点下面的按钮，让 AI 把它梳理成一份周报' : '先去记几件事，回来再生成'}</div>
         <button class="btn primary" data-action="gen-report" style="margin-top:18px">${I.spark}生成周报</button>
       </div></div>`;
     }
 
     return `
       <div class="report-toolbar">
-        <span class="mode-pill ${mode !== 'demo' ? 'live' : ''}">${modeText}</span>
+        <span class="mode-pill ${ready ? 'live' : ''}">${ready ? '已接入 · ' + escapeHtml(modelName) : '未接入 AI'}</span>
         <span style="font-size:12.5px;color:var(--muted)">${fmtMD(weekStart)} — ${fmtMD(end)}</span>
-        ${mode === 'demo' ? `<button class="btn ghost sm" data-action="settings" style="margin-left:auto">接入真 AI</button>` : ''}
+        ${ready ? `<button class="btn quiet sm" data-action="settings" style="margin-left:auto">${I.settings}AI 设置</button>` : ''}
       </div>
       ${body}`;
   }
 
   /* ---------------- 计划编辑弹窗 ---------------- */
-  function openPlanModal(planId, presetDate) {
+  function openPlanModal(planId, presetDate, presetTitle) {
     const plan = planId ? state.plans.find(p => p.id === planId) : null;
     const p = plan || makePlan({ plan_date: presetDate || state.date, category_id: state.quickCat || state.categories[0]?.id });
+    if (!plan && presetTitle) p.title = presetTitle;
     const isNew = !plan;
 
     const cats = state.categories.map(c => `
@@ -541,10 +567,32 @@
     });
   }
 
+  /* 把设置里填的 AI 配置存下来（Key / 地址 / 模型） */
+  async function persistAISettings() {
+    const keyIn = $('#api-key'), baseIn = $('#ai-base'), modelIn = $('#ai-model');
+    if (!keyIn || !baseIn || !modelIn) return state.settings;
+    state.settings = await saveSettings({
+      apiKey: keyIn.value.trim(),
+      aiBaseUrl: baseIn.value.trim() || DEFAULT_BASE_URL,
+      aiModel: modelIn.value.trim() || DEFAULT_MODEL,
+    });
+    const badge = $('.ai-badge');
+    if (badge) {
+      const on = isConfigured(state.settings);
+      badge.classList.toggle('on', on);
+      badge.textContent = on ? '已接入' : '未接入';
+    }
+    return state.settings;
+  }
+
   /* ---------------- 设置弹窗 ---------------- */
   function openSettings() {
     const s = state.settings;
     const cats = state.categories;
+    const hasKey = isConfigured(s);
+    const baseUrl = String(s.aiBaseUrl || DEFAULT_BASE_URL).toLowerCase();
+    const preset = baseUrl.includes('deepseek') ? 'deepseek'
+      : baseUrl.includes('openai.com') ? 'openai' : 'custom';
 
     openModal(`
       <div class="modal-head">
@@ -561,23 +609,49 @@
           <button class="switch ${s.theme === 'dark' ? 'on' : ''}" data-action="toggle-theme"></button>
         </div>
 
-        <div style="padding:18px 0 6px">
-          <div class="label" style="font-size:12.5px;margin-bottom:10px">AI 周报</div>
-          <select class="field" id="ai-mode" style="margin-bottom:12px">
-            <option value="demo" ${s.aiMode === 'demo' ? 'selected' : ''}>演示模式 — 本地规则生成，不联网</option>
-            <option value="proxy" ${s.aiMode === 'proxy' ? 'selected' : ''}>代理模式 — 走自有后端，Key 在服务端</option>
-            <option value="key" ${s.aiMode === 'key' ? 'selected' : ''}>自带 Key — 直接调用，仅自己用</option>
-          </select>
-
-          <div id="proxy-box" style="display:${s.aiMode === 'proxy' ? 'block' : 'none'}">
-            <input class="field" id="proxy-endpoint" placeholder="代理地址，例如 https://your-api.com/report" value="${escapeHtml(s.proxyEndpoint || '')}" style="margin-bottom:8px">
-            <div class="set-desc" style="margin-bottom:12px">POST 一个 JSON，返回 <code>{ report: "…" }</code> 即可</div>
+        <div class="set-block">
+          <div class="set-block-head">
+            <div class="label" style="font-size:12.5px">AI 周报</div>
+            <span class="ai-badge ${hasKey ? 'on' : ''}">${hasKey ? '已接入' : '未接入'}</span>
           </div>
 
-          <div id="key-box" style="display:${s.aiMode === 'key' ? 'block' : 'none'}">
-            <input class="field" id="api-key" type="password" placeholder="DeepSeek API Key" value="${escapeHtml(s.apiKey || '')}" style="margin-bottom:8px">
-            <input class="field" id="ai-model" placeholder="模型" value="${escapeHtml(s.aiModel || 'deepseek-chat')}">
-            <div class="set-desc" style="margin-top:8px">Key 只存在你这台设备的浏览器里，不会上传</div>
+          <div class="ai-presets">
+            <button type="button" class="chip ${preset === 'deepseek' ? 'on' : ''}" data-action="ai-preset" data-preset="deepseek">DeepSeek</button>
+            <button type="button" class="chip ${preset === 'openai' ? 'on' : ''}" data-action="ai-preset" data-preset="openai">OpenAI</button>
+            <button type="button" class="chip ${preset === 'custom' ? 'on' : ''}" data-action="ai-preset" data-preset="custom">自定义</button>
+          </div>
+
+          <div class="field-row">
+            <label class="label-sub">API Key</label>
+            <div class="key-wrap">
+              <input class="field" id="api-key" type="password" placeholder="粘贴你的 API Key"
+                     value="${escapeHtml(s.apiKey || '')}" autocomplete="off" spellcheck="false">
+              <button type="button" class="icon-btn" data-action="toggle-key" title="显示 / 隐藏">${I.eye}</button>
+            </div>
+          </div>
+
+          <div class="field-2 field-row">
+            <div>
+              <label class="label-sub">服务地址</label>
+              <input class="field" id="ai-base" placeholder="https://api.deepseek.com"
+                     value="${escapeHtml(s.aiBaseUrl || 'https://api.deepseek.com')}" spellcheck="false">
+            </div>
+            <div>
+              <label class="label-sub">模型</label>
+              <input class="field" id="ai-model" placeholder="deepseek-chat"
+                     value="${escapeHtml(s.aiModel || 'deepseek-chat')}" spellcheck="false">
+            </div>
+          </div>
+
+          <div class="ai-test-row">
+            <button type="button" class="btn ghost sm" data-action="test-ai">${I.spark}测试连接</button>
+            <span class="ai-test-msg" id="ai-test-msg"></span>
+          </div>
+
+          <div class="set-desc" style="margin-top:2px;line-height:1.7">
+            Key 只存在这台设备里，不会上传。还没有？去
+            <a class="set-link" href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">DeepSeek 控制台</a>
+            申请一个，几十秒。
           </div>
         </div>
 
@@ -615,26 +689,12 @@
         </div>
       </div>
     `, (root) => {
-      const modeSel = $('#ai-mode', root);
-      modeSel.addEventListener('change', () => {
-        $('#proxy-box', root).style.display = modeSel.value === 'proxy' ? 'block' : 'none';
-        $('#key-box', root).style.display = modeSel.value === 'key' ? 'block' : 'none';
-        persistAI(root);
+      ['api-key', 'ai-base', 'ai-model'].forEach(id => {
+        $('#' + id, root)?.addEventListener('change', async () => {
+          await persistAISettings();
+          render();
+        });
       });
-      $('#proxy-endpoint', root)?.addEventListener('change', () => persistAI(root));
-      $('#api-key', root)?.addEventListener('change', () => persistAI(root));
-      $('#ai-model', root)?.addEventListener('change', () => persistAI(root));
-
-      async function persistAI(r) {
-        const patch = {
-          aiMode: $('#ai-mode', r).value,
-          proxyEndpoint: $('#proxy-endpoint', r)?.value.trim() || '',
-          apiKey: $('#api-key', r)?.value.trim() || '',
-          aiModel: $('#ai-model', r)?.value.trim() || 'deepseek-chat',
-        };
-        state.settings = await saveSettings(patch);
-        render();
-      }
 
       // 分类改名 / 改色
       root.addEventListener('change', async (e) => {
@@ -675,43 +735,39 @@
   async function generateReport() {
     const weekStart = weekStartOf(state.date, state.settings.weekStart || 1);
     const { end } = weekRangeOf(state.date, state.settings.weekStart || 1);
-    const prevStart = addDays(weekStart, -7);
-    const prevEnd = addDays(weekStart, -1);
-
     const plans = state.plans.filter(p => p.plan_date >= weekStart && p.plan_date <= end);
-    const prevPlans = state.plans.filter(p => p.plan_date >= prevStart && p.plan_date <= prevEnd);
 
-    state.reportLoading = true;
-    renderContent();
-
-    const mode = state.settings.aiMode || 'demo';
-    let text;
-    try {
-      if (mode === 'proxy' && state.settings.proxyEndpoint) {
-        const prompt = buildPrompt({ plans, categories: state.categories, start: weekStart, end });
-        text = await generateViaProxy({ endpoint: state.settings.proxyEndpoint, prompt });
-      } else if (mode === 'key' && state.settings.apiKey) {
-        const prompt = buildPrompt({ plans, categories: state.categories, start: weekStart, end });
-        text = await generateViaKey({
-          apiKey: state.settings.apiKey,
-          model: state.settings.aiModel,
-          prompt,
-        });
-      } else {
-        // 本地生成加一点点延迟，让"正在读记录"这个过渡被看见
-        await new Promise(r => setTimeout(r, 380));
-        text = generateLocalReport({ plans, categories: state.categories, start: weekStart, end, prevPlans });
-      }
-    } catch (err) {
-      console.error(err);
-      toast('生成失败，已改用本地生成：' + (err.message || '').slice(0, 40), 3200);
-      text = generateLocalReport({ plans, categories: state.categories, start: weekStart, end, prevPlans });
+    if (!isConfigured(state.settings)) {
+      toast('还没接入 AI，先填一个 API Key', 2600);
+      openSettings();
+      return;
+    }
+    if (!plans.length) {
+      toast('这一周还没有记录，先去记两件事', 2600);
+      return;
     }
 
-    state.report = { weekStart, end, text, at: Date.now() };
-    state.reportLoading = false;
+    state.reportLoading = true;
+    state.reportError = null;
     renderContent();
-    toast('周报已生成');
+
+    try {
+      const text = await callAI({
+        baseUrl: state.settings.aiBaseUrl,
+        apiKey: state.settings.apiKey,
+        model: state.settings.aiModel,
+        prompt: buildPrompt({ plans, categories: state.categories, start: weekStart, end }),
+      });
+      state.report = { weekStart, end, text, at: Date.now(), model: state.settings.aiModel };
+      toast('周报已生成');
+    } catch (err) {
+      console.error(err);
+      state.report = null;
+      state.reportError = err.message || '未知错误';
+    } finally {
+      state.reportLoading = false;
+      renderContent();
+    }
   }
 
   function downloadReport() {
@@ -798,6 +854,14 @@
         break;
       }
 
+      case 'quick-detail': {
+        const input = $('#quick-input');
+        const typed = (input?.value || '').trim();
+        if (input) input.value = '';
+        openPlanModal(null, state.date, typed);
+        break;
+      }
+
       case 'toggle': {
         const p = state.plans.find(x => x.id === t.dataset.id);
         if (!p) return;
@@ -841,6 +905,64 @@
         closeModal();
         openSettings();
         break;
+
+      case 'toggle-key': {
+        const inp = $('#api-key');
+        if (!inp) return;
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+        if (inp.type === 'text') inp.focus();
+        break;
+      }
+
+      case 'ai-preset': {
+        const which = t.dataset.preset;
+        const baseIn = $('#ai-base');
+        const modelIn = $('#ai-model');
+        if (!baseIn || !modelIn) return;
+        if (which === 'custom') {
+          baseIn.focus();
+          baseIn.select();
+          return;
+        }
+        if (which === 'deepseek') {
+          baseIn.value = 'https://api.deepseek.com';
+          modelIn.value = 'deepseek-chat';
+        } else if (which === 'openai') {
+          baseIn.value = 'https://api.openai.com/v1';
+          modelIn.value = 'gpt-4o-mini';
+        }
+        $$('.ai-presets .chip').forEach(c => c.classList.toggle('on', c.dataset.preset === which));
+        await persistAISettings();
+        const msg = $('#ai-test-msg');
+        if (msg) { msg.textContent = ''; msg.className = 'ai-test-msg'; }
+        break;
+      }
+
+      case 'test-ai': {
+        const msg = $('#ai-test-msg');
+        const setMsg = (text, kind = '') => {
+          if (!msg) return;
+          msg.textContent = text;
+          msg.className = 'ai-test-msg' + (kind ? ' ' + kind : '');
+        };
+        const s0 = await persistAISettings();
+        if (!isConfigured(s0)) { setMsg('先填一个 API Key', 'bad'); return; }
+
+        const btn = t;
+        btn.disabled = true;
+        setMsg('正在连接…');
+        render();
+        try {
+          const r = await testAI({ baseUrl: s0.aiBaseUrl, apiKey: s0.apiKey, model: s0.aiModel });
+          setMsg(`连接正常 · ${(r.ms / 1000).toFixed(1)} 秒`, 'ok');
+          toast('AI 已接通，可以生成周报了');
+        } catch (err) {
+          setMsg(err.message || '连接失败', 'bad');
+        } finally {
+          btn.disabled = false;
+        }
+        break;
+      }
 
       case 'toggle-theme': {
         const next = state.settings.theme === 'dark' ? 'light' : 'dark';

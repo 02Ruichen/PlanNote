@@ -247,8 +247,7 @@ function sortPlans(a, b) {
 /* ---------------- 设置 ---------------- */
 const DEFAULT_SETTINGS = {
   theme: 'light',
-  aiMode: 'demo',          // demo | proxy | key
-  proxyEndpoint: '',
+  aiBaseUrl: 'https://api.deepseek.com',
   apiKey: '',
   aiModel: 'deepseek-chat',
   weekStart: 1,
