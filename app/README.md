@@ -40,6 +40,7 @@ Chrome 地址栏右侧会出现「安装」按钮，装完就是一个独立窗�
 | 周报规则 / 模板 | 粘贴公司模板、格式要求、历史样例或提示词；生成时作为硬性格式要求，优先于默认四段结构 |
 | 备份 | 一键导出 / 导入 JSON，换设备不丢数据 |
 | 深色模式 | 跟着作息换一身衣服 |
+| 手机底栏 | 六个入口都带文字标签（日计划 / 周视图 / 月视图 / 统计 / AI 周报 / 设置），不靠猜图标 |
 
 快捷键：`N` 新建、`Esc` 关闭弹窗、输入框里回车即添加。
 
@@ -92,8 +93,9 @@ Chrome 地址栏右侧会出现「安装」按钮，装完就是一个独立窗�
 
 ```bash
 cd test
-node run-tests.mjs          # 用本地模拟接口跑，不花钱、不联网
-node run-tests.mjs --live   # 加真实调用（把 Key 写进 test/.key，或用 PN_API_KEY 传入）
+node run-tests.mjs            # 用本地模拟接口跑，不花钱、不联网
+node run-tests.mjs --live     # 加真实调用（把 Key 写进 test/.key，或用 PN_API_KEY 传入）
+node verify-mobile-fix.mjs    # 手机端专项（锚点落位 / 底栏标签 / 提示条遮挡）
 ```
 
 测试全程在**一次性的临时浏览器目录**里进行，跑完整个目录删掉，
@@ -144,6 +146,7 @@ test/
 ├── run-tests.mjs           端到端测试（T1–T5）
 ├── capture-shots.mjs       生成介绍页配图（写入示例数据后截图）
 ├── verify-landing.mjs      介绍页整页渲染校验
+├── verify-mobile-fix.mjs   手机端专项：锚点跳转落位、底栏文字标签、提示条遮挡
 └── verify-online.mjs       线上验收（渲染/跳转/PWA/离线/数据隔离）
 ```
 

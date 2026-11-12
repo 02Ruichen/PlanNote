@@ -123,7 +123,7 @@ const SHOT_DIR = path.join(os.tmpdir(), 'plannote-shots');
 async function main() {
   const [appPort, mockPort, cdpPort] = [await freePort(), await freePort(), await freePort()];
   const mockUrl = `http://127.0.0.1:${mockPort}`;
-  const appUrl = `http://127.0.0.1:${appPort}/index.html`;
+  const appUrl = `http://127.0.0.1:${appPort}/app.html`;   // 应用本体（index.html 已改为作品介绍页）
 
   const tmpRoot = path.join(os.tmpdir(), `plannote-test-${Date.now()}`);
   const profileDir = path.join(tmpRoot, 'chrome-profile');

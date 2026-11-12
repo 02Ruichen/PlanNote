@@ -150,7 +150,8 @@
     const sIco = $('#settings-ico');
     if (sIco) sIco.innerHTML = I.settings;
     $('#nav').innerHTML = NAV.map(n => `
-      <button class="nav-item ${state.view === n.id ? 'active' : ''}" data-action="nav" data-view="${n.id}" title="${n.label}">
+      <button class="nav-item ${state.view === n.id ? 'active' : ''}" data-action="nav" data-view="${n.id}"
+              title="${n.label}" aria-label="${n.label}"${state.view === n.id ? ' aria-current="page"' : ''}>
         <span class="ico">${I[n.icon]}</span><span class="nav-label">${n.label}</span>
       </button>`).join('');
   }

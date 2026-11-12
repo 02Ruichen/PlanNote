@@ -766,11 +766,23 @@ select.field { cursor: pointer; appearance: none;
    响应式
    ============================================================ */
 @media (max-width: 1080px) {
-  .app { grid-template-columns: 70px 1fr; }
-  .sidebar { padding: var(--s5) 10px; }
+  .app { grid-template-columns: 74px 1fr; }
+  .sidebar { padding: var(--s5) 8px; }
   .brand { justify-content: center; padding: 0 0 var(--s5); }
-  .brand-text, .nav-label { display: none; }
-  .nav-item { justify-content: center; padding: 11px 0; }
+  .brand-text { display: none; }
+  /* 侧栏收窄成图标栏，但文字必须留着：
+     只有图标时，「日 / 周 / 月」三个符号形状接近，新用户分不出哪个是哪个。
+     改成图标在上、文字在下的竖排，宽度仍然够。 */
+  .nav-item {
+    flex-direction: column; gap: 4px; text-align: center;
+    justify-content: center; padding: 9px 2px;
+  }
+  .nav-item .nav-label {
+    display: block; font-size: 9.5px; line-height: 1.25;
+    font-weight: 500; letter-spacing: 0; white-space: nowrap;
+  }
+  .nav-item .ico { width: 19px; height: 19px; }
+  .nav-item svg { width: 19px; height: 19px; }
   .content { padding: 0 var(--s5) var(--s6); }
   .topbar { padding: var(--s5) var(--s5) var(--s4); }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
@@ -786,10 +798,22 @@ select.field { cursor: pointer; appearance: none;
   }
   .brand { display: none; }
   .nav { flex-direction: row; gap: 2px; flex: 1 1 auto; }
-  .nav-item { flex: 1; padding: 9px 0; justify-content: center; }
-  .sidebar-foot { border: none; margin: 0; padding: 0; flex: 0 0 54px; width: 54px; }
+  .nav-item {
+    flex: 1; min-width: 0; padding: 6px 2px 5px; gap: 3px;
+    justify-content: center; border-radius: 12px;
+  }
+  .nav-item .nav-label {
+    display: block; font-size: 10px; line-height: 1.2;
+    font-weight: 500; letter-spacing: 0;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+  }
+  .nav-item .ico { width: 20px; height: 20px; }
+  .nav-item svg { width: 20px; height: 20px; }
+  .sidebar-foot { border: none; margin: 0; padding: 0; flex: 0 0 50px; width: 50px; }
   .sidebar-foot .nav-item { width: 100%; }
-  .main { padding-bottom: 76px; }
+  .main { padding-bottom: 94px; }
+  /* 提示条要抬到底栏上方，否则一弹出来就压住导航文字 */
+  .toast-wrap { bottom: 86px; }
   .topbar { padding: 16px 16px 10px; flex-wrap: wrap; gap: 8px; }
   .topbar-kicker { display: none; }
   .topbar-title { flex: 1 1 100%; }
@@ -931,4 +955,14 @@ select.field { cursor: pointer; appearance: none;
   .rule-head { padding: 12px 14px; }
   .rule-body { padding: 0 14px 14px; }
   .quick-add .add-btn { padding: 0 12px; }
+}
+
+/* 小屏（320–380px）：底栏要挤下 6 项，字号再降一档，避免文字被截成省略号 */
+@media (max-width: 380px) {
+  .nav-item { padding: 5px 1px 4px; gap: 2px; }
+  .nav-item .nav-label { font-size: 9px; }
+  .nav-item .ico { width: 18px; height: 18px; }
+  .nav-item svg { width: 18px; height: 18px; }
+  .sidebar-foot { flex: 0 0 44px; width: 44px; }
+  .main { padding-bottom: 88px; }
 }

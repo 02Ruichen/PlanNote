@@ -148,6 +148,7 @@
       <figure class="lp-shot big rise">
         <img src="./shots/shot-report.png" alt="生成的周报正文：本周概览、精力分配、完成质量、下周建议四个小节" width="1280" height="1040" loading="lazy">
       </figure>
+      <p class="lp-zoom-tip">手机上可左右滑动，看完整周报</p>
       <p class="lp-note">
         AI 周报需要填一个自己的 API Key（支持 OpenAI 兼容接口）。
         其余功能——记录、视图、统计、备份——开箱可用，不需要联网。
@@ -228,6 +229,76 @@ if ('serviceWorker' in navigator) {
     });
   }, { rootMargin: '0px 0px -12% 0px', threshold: .08 });
   items.forEach((el) => io.observe(el));
+})();
+</script>
+<script>
+/* 页内锚点跳转：自己算位置，不依赖浏览器对 scroll-behavior:smooth + #hash 的支持。
+   两个真实原因：
+   1) 部分手机 WebView / 旧版浏览器对「smooth + 锚点」支持不完整，点了没反应；
+   2) 页面里是懒加载图片，落位过程中图片才加载完，浏览器算好的目标点会偏。
+   现在的做法：每帧重算终点，落位后再按图片加载情况校正一次；没有 JS 时原生锚点照常工作。 */
+(() => {
+  const nav = document.querySelector('.lp-nav');
+  const pad = () => (nav ? Math.round(nav.getBoundingClientRect().height) : 0) + 10;
+  const targetY = (el) =>
+    Math.max(0, Math.round(el.getBoundingClientRect().top + window.scrollY - pad()));
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function goTo(el, smooth) {
+    const to = targetY(el);
+    if (!smooth || reduce.matches || !window.requestAnimationFrame) {
+      window.scrollTo(0, to);
+      return;
+    }
+    const from = window.scrollY;
+    if (Math.abs(to - from) < 4) return;
+    const dur = Math.min(720, 280 + Math.abs(to - from) * 0.12);
+    const t0 = performance.now();
+    const tick = (now) => {
+      const p = Math.min(1, (now - t0) / dur);
+      const ease = 1 - Math.pow(1 - p, 3);
+      window.scrollTo(0, from + (targetY(el) - from) * ease);
+      if (p < 1) requestAnimationFrame(tick);
+      else window.scrollTo(0, targetY(el));
+    };
+    requestAnimationFrame(tick);
+  }
+
+  // 落位之后图片才加载完 → 再对齐一次（只在用户没有自己滚动时纠正）
+  function settle(el) {
+    const y0 = targetY(el);
+    const pending = Array.from(document.images).filter((i) => !(i.complete && i.naturalWidth));
+    if (!pending.length) return;
+    let done = false;
+    const fix = () => {
+      if (done) return;
+      done = true;
+      if (Math.abs(window.scrollY - y0) < 6) window.scrollTo(0, targetY(el));
+    };
+    Promise.all(pending.map((i) => new Promise((r) => {
+      i.addEventListener('load', r, { once: true });
+      i.addEventListener('error', r, { once: true });
+    }))).then(fix);
+    setTimeout(fix, 1600);
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach((a) => {
+    a.addEventListener('click', (ev) => {
+      const id = (a.getAttribute('href') || '').slice(1);
+      const el = id ? document.getElementById(id) : null;
+      if (!el) return;                    // 找不到目标就用浏览器默认行为，避免变成死点击
+      ev.preventDefault();
+      try { history.pushState(null, '', '#' + id); } catch (e) { location.hash = id; }
+      goTo(el, true);
+      settle(el);
+    });
+  });
+
+  window.addEventListener('popstate', () => {
+    const id = (location.hash || '').slice(1);
+    const el = id ? document.getElementById(id) : null;
+    if (el) goTo(el, false);
+  });
 })();
 </script>
 

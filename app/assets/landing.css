@@ -29,6 +29,9 @@
 
 html { scroll-behavior: smooth; color-scheme: light; }
 
+/* 顶部导航是 sticky 的，锚点跳转要给标题留出它的高度，否则标题会被压在导航下面 */
+.lp-section, .lp-hero, .lp-cta { scroll-margin-top: 72px; }
+
 body {
   margin: 0;
   background: var(--bg);
@@ -158,6 +161,15 @@ p { margin: 0; }
 .lp-shot img { width: 100%; height: auto; }
 .lp-shot.big { margin-top: 34px; border-radius: 14px; }
 
+/* 手机上的说明文字：桌面端整图看得清，不需要 */
+.lp-zoom-tip {
+  display: none;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: .02em;
+}
+
 /* ---------------- 通用区块 ---------------- */
 
 .lp-section { padding: 104px 0 0; }
@@ -252,6 +264,11 @@ p { margin: 0; }
 .lp-feature-shot img { width: 100%; height: auto; }
 .lp-feature-shot.portrait {
   max-width: 300px;
+  /* 关键：必须给 figure 一个确定宽度。
+     只写 max-width 时，grid 里 justify-self:center 会让它收缩到内容宽度，
+     而图片未加载前内容宽度是 0 —— 整块塌成 0×0，下方内容整体上移，
+     锚点跳转就会落偏（手机首屏直接点「先看一份周报」必现）。 */
+  width: 100%;
   justify-self: center;
   border-radius: 22px;
 }
@@ -353,6 +370,7 @@ p { margin: 0; }
 @media (max-width: 900px) {
   .lp-links { display: none; }
   .lp-hero { padding-top: 54px; }
+  .lp-section, .lp-hero, .lp-cta { scroll-margin-top: 66px; }
   .lp-grid.three { grid-template-columns: 1fr; gap: 14px; }
   .lp-feature {
     grid-template-columns: 1fr;
@@ -366,6 +384,12 @@ p { margin: 0; }
   .lp-section.sample { padding-top: 84px; }
   .lp-cta { margin-top: 80px; padding: 60px 0 64px; }
   .lp-shot { margin-top: 40px; }
+
+  /* 一部手机只有 350px 宽，把 1280 宽的周报整张缩进去，字只有 3px 高，等于没给看。
+     改成按 190% 宽度展示、左右滑动查看，才真读得到内容。 */
+  .lp-shot.big { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .lp-shot.big img { width: 190%; max-width: none; }
+  .lp-zoom-tip { display: block; }
 }
 
 @media (max-width: 560px) {

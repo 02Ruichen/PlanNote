@@ -1,5 +1,5 @@
 /* PlanNote Service Worker · 离线可用 */
-const CACHE = 'plannote-v2.1.0';
+const CACHE = 'plannote-v2.1.1';
 const SHELL = [
   './',
   './index.html',
