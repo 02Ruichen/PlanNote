@@ -162,9 +162,10 @@ def _load_template_style():
 
 
 def _call_deepseek(system_prompt, user_content):
-    """调用 DeepSeek API 生成周报"""
+    """调用 DeepSeek API 生成周报（用 requests 避免 openai 打包问题）"""
     try:
-        from openai import OpenAI
+        import json as _json
+        from urllib import request as _req
         import config as cfg
 
         # 加载 API Key
@@ -176,17 +177,23 @@ def _call_deepseek(system_prompt, user_content):
         if not api_key:
             return None
 
-        client = OpenAI(api_key=api_key, base_url='https://api.deepseek.com')
-        response = client.chat.completions.create(
-            model='deepseek-chat',
-            messages=[
+        data = _json.dumps({
+            'model': 'deepseek-chat',
+            'messages': [
                 {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': user_content},
             ],
-            max_tokens=2048,
-            temperature=0.7,
-        )
-        return response.choices[0].message.content
+            'max_tokens': 2048,
+            'temperature': 0.7,
+        }).encode('utf-8')
+
+        req = _req.Request('https://api.deepseek.com/chat/completions', data=data, headers={
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}',
+        })
+        with _req.urlopen(req, timeout=60) as resp:
+            body = _json.loads(resp.read().decode('utf-8'))
+            return body['choices'][0]['message']['content']
     except Exception:
         return None
 

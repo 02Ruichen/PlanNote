@@ -127,14 +127,10 @@ class AIAssistView(tk.Frame):
             self._init_client()
 
     def _init_client(self):
-        """初始化 DeepSeek 客户端（OpenAI 兼容接口）"""
-        try:
-            from openai import OpenAI
-            self.client = OpenAI(
-                api_key=self.api_key,
-                base_url=self.BASE_URL,
-            )
-        except Exception:
+        """初始化 DeepSeek 客户端（用 requests 直调，不需要 openai SDK）"""
+        if self.api_key:
+            self.client = True  # 有 key 即可，用 requests 直调
+        else:
             self.client = None
 
     def _save_api_key(self, key):
@@ -450,13 +446,21 @@ class AIAssistView(tk.Frame):
 
         def call_deepseek():
             try:
-                response = self.client.chat.completions.create(
-                    model=self.MODEL,
-                    messages=messages,
-                    max_tokens=2048,
-                    temperature=0.7,
-                )
-                reply = response.choices[0].message.content
+                import json as _json
+                from urllib import request as _req
+                data = _json.dumps({
+                    'model': self.MODEL,
+                    'messages': messages,
+                    'max_tokens': 2048,
+                    'temperature': 0.7,
+                }).encode('utf-8')
+                req = _req.Request(
+                    self.BASE_URL + '/chat/completions', data=data,
+                    headers={'Content-Type': 'application/json',
+                             'Authorization': f'Bearer {self.api_key}'})
+                with _req.urlopen(req, timeout=120) as resp:
+                    body = _json.loads(resp.read().decode('utf-8'))
+                    reply = body['choices'][0]['message']['content']
                 self.after(0, lambda: self._update_ai_reply(thinking_msg, reply))
             except Exception as e:
                 self.after(0, lambda: self._update_ai_reply(
