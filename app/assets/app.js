@@ -89,17 +89,34 @@
     return '<span class="stars">' + '★'.repeat(Math.max(1, Math.min(5, p || 3))) + '</span>';
   }
 
+  // 同一时刻只保留最新一条提示：连点按钮时不会把提示堆成一列压住正文
   function toast(msg, ms = 2000) {
     const wrap = $('#toast-wrap');
-    const el = document.createElement('div');
-    el.className = 'toast';
-    el.textContent = msg;
-    wrap.appendChild(el);
-    setTimeout(() => {
+    if (!wrap) return;
+    const olds = Array.from(wrap.querySelectorAll('.toast'));
+    const last = olds[olds.length - 1];
+    const reuse = last && last.textContent === msg ? last : null;
+    olds.forEach((n) => {
+      if (n === reuse) return;
+      clearTimeout(n._hide);
+      clearTimeout(n._kill);
+      n.remove();
+    });
+    let el = reuse;
+    if (el) {
+      clearTimeout(el._hide);
+      clearTimeout(el._kill);
+    } else {
+      el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = msg;
+      wrap.appendChild(el);
+    }
+    el._hide = setTimeout(() => {
       el.style.transition = 'opacity .2s, transform .2s';
       el.style.opacity = '0';
       el.style.transform = 'translateY(8px)';
-      setTimeout(() => el.remove(), 220);
+      el._kill = setTimeout(() => el.remove(), 220);
     }, ms);
   }
 
