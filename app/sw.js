@@ -1,9 +1,11 @@
 /* PlanNote Service Worker · 离线可用 */
-const CACHE = 'plannote-v2.0.0';
+const CACHE = 'plannote-v2.1.0';
 const SHELL = [
   './',
   './index.html',
+  './app.html',
   './manifest.webmanifest',
+  './assets/landing.css',
   './assets/theme.css',
   './assets/db.js',
   './assets/report.js',

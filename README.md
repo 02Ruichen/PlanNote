@@ -2,13 +2,15 @@
 
 > 极简工作记录 + AI 自动周报生成
 
+**🌐 在线体验：https://02ruichen.github.io/PlanNote/** — 点开即用，不用注册，数据留在你自己的设备上。
+
 每天记录做了什么，周末一键生成标准格式周报。
 
 ## ✨ v2 · 网页版（已可运行）
 
 PlanNote 已从桌面应用重塑为 **纯前端网页 + PWA**：点开就能用，可以装到桌面当 App，数据留在自己设备上。
 
-👉 **入口：[`app/index.html`](app/index.html)** · 说明见 [`app/README.md`](app/README.md)
+👉 **入口：[`app/index.html`](app/index.html)**（作品介绍页）· 应用本体是 [`app/app.html`](app/app.html) · 说明见 [`app/README.md`](app/README.md)
 
 - **形态**：原生 JS + CSS，零构建零依赖；可安装为 PWA，离线可用
 - **数据**：IndexedDB 存储（直接双击本地文件时自动降级到 localStorage），支持导出 / 导入 JSON 备份

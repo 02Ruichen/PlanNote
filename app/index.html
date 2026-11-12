@@ -1,48 +1,235 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PlanNote · 极简个人计划管理</title>
-<meta name="description" content="记录每天要做的事，周末自动生成周报。莫兰迪质感，数据留在你自己的设备上。">
+<title>PlanNote · 每天随手记一句，周五它替你写完周报</title>
+<meta name="description" content="PlanNote 是一个给上班族用的个人计划管理工具：随手记下每天做的事，周末按你公司的格式自动生成周报。纯前端，数据只存在你自己的设备上。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="PlanNote · 随手记，周末自动写周报">
+<meta property="og:description" content="给要交周报的上班族。纯前端，无需注册，数据留在本机。">
+<meta property="og:image" content="./shots/shot-day.png">
 <meta name="theme-color" content="#F2EFEC">
-<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="assets/theme.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="assets/landing.css">
 </head>
 <body>
-  <div class="blob blob-a"></div>
-  <div class="blob blob-b"></div>
 
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">P</div>
-        <div class="brand-text">
-          <div class="brand-name">PLANNOTE</div>
-          <div class="brand-sub">计划 · 记录 · 周报</div>
-        </div>
-      </div>
-      <nav class="nav" id="nav"></nav>
-      <div class="sidebar-foot">
-        <button class="nav-item" data-action="settings">
-          <span class="ico" id="settings-ico"></span><span class="nav-label">设置</span>
-        </button>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar" id="topbar"></header>
-      <div class="content scroll" id="content"></div>
-    </main>
+<header class="lp-nav">
+  <div class="lp-wrap lp-nav-inner">
+    <a class="lp-brand" href="./index.html">
+      <span class="lp-mark">P</span>
+      <span class="lp-brand-text">
+        <b>PLANNOTE</b>
+        <i>计划 · 记录 · 周报</i>
+      </span>
+    </a>
+    <nav class="lp-links">
+      <a href="#why">为什么</a>
+      <a href="#how">怎么用</a>
+      <a href="#sample">周报样例</a>
+      <a href="#choices">设计取舍</a>
+    </nav>
+    <a class="lp-btn primary" href="./app.html">打开应用</a>
   </div>
+</header>
 
-  <div id="modal-root"></div>
-  <div class="toast-wrap" id="toast-wrap"></div>
+<main>
 
-  <script src="assets/db.js" defer></script>
-  <script src="assets/report.js" defer></script>
-  <script src="assets/app.js" defer></script>
+  <section class="lp-hero">
+    <div class="lp-wrap">
+      <p class="lp-kicker">个人计划管理 · 纯前端 · 数据留在本机</p>
+      <h1>每天随手记一句，<br>周五它替你写完周报。</h1>
+      <p class="lp-lead">
+        给要交日报、周报的上班族。不用注册、不用安装，
+        记下的每件事只存在你自己的设备上。
+      </p>
+      <div class="lp-actions">
+        <a class="lp-btn primary lg" href="./app.html">打开应用</a>
+        <a class="lp-btn ghost lg" href="#sample">先看一份周报</a>
+      </div>
+      <p class="lp-fine">无需登录 · 可装到桌面和手机 · 断网也能记</p>
+    </div>
+    <div class="lp-wrap">
+      <figure class="lp-shot rise">
+        <img src="./shots/shot-day.png" alt="PlanNote 今日视图：按模块分组的任务列表，顶部可切换模块筛选" width="1280" height="800" loading="eager">
+      </figure>
+    </div>
+  </section>
+
+  <section class="lp-section" id="why">
+    <div class="lp-wrap">
+      <h2>写不出周报，往往不是因为不会写</h2>
+      <p class="lp-sub">打开文档那一刻，真正卡住的是另一件事。</p>
+      <div class="lp-grid three">
+        <article class="lp-card rise">
+          <span class="lp-num">01</span>
+          <h3>想不起做过什么</h3>
+          <p>一周过去，具体交付了什么全靠翻聊天记录和邮件找线索，最后只能写「推进了若干事项」。</p>
+        </article>
+        <article class="lp-card rise">
+          <span class="lp-num">02</span>
+          <h3>素材散在五个地方</h3>
+          <p>待办在备忘录，结果在群里，花了多久只有自己知道。拼起来要半小时，写出来只剩三行。</p>
+        </article>
+        <article class="lp-card rise">
+          <span class="lp-num">03</span>
+          <h3>写出来像套话</h3>
+          <p>「积极推进」「持续跟进」，这类词领导一眼看得出是在凑字数，反而扣分。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="how">
+    <div class="lp-wrap">
+      <h2>它只做三件事，每件都做到底</h2>
+      <p class="lp-sub">没有项目管理、没有团队协作、没有甘特图。就是一个人的计划本。</p>
+
+      <div class="lp-feature rise">
+        <div class="lp-feature-text">
+          <span class="lp-step">01 · 记</span>
+          <h3>一条回车就够</h3>
+          <p>只写一句话也能存下，模块、优先级、时间都可以之后补。日、周、月三个视角看的是同一批数据，不用重复录入。</p>
+          <ul class="lp-list">
+            <li>模块可以自己建，和工作、学习、生活同一层级</li>
+            <li>按模块筛选，只看一个项目这周推进到哪</li>
+            <li>完成的打勾，进度条当天就更新</li>
+          </ul>
+        </div>
+        <figure class="lp-feature-shot">
+          <img src="./shots/shot-week.png" alt="周视图：一列七天，按天排布当周任务" width="1280" height="800" loading="lazy">
+        </figure>
+      </div>
+
+      <div class="lp-feature reverse rise">
+        <div class="lp-feature-text">
+          <span class="lp-step">02 · 写</span>
+          <h3>按你公司的格式写</h3>
+          <p>把公司模板、格式要求、历史样例粘进「周报规则」，生成时它优先于默认结构。标题、小节、落款都照你的来，不用每次手动改。</p>
+          <ul class="lp-list">
+            <li>规则会用分隔符显式包起来，并声明冲突时以它为准</li>
+            <li>可以只给某一个项目出周报，其它模块不计入</li>
+            <li>生成结果能复制、能下载成 .md</li>
+          </ul>
+        </div>
+        <figure class="lp-feature-shot">
+          <img src="./shots/shot-rule.png" alt="周报规则面板：把公司模板粘进去，生成时会原样发给模型并优先于默认格式" width="1280" height="1040" loading="lazy">
+        </figure>
+      </div>
+
+      <div class="lp-feature rise">
+        <div class="lp-feature-text">
+          <span class="lp-step">03 · 存</span>
+          <h3>不经过任何服务器</h3>
+          <p>没有账号系统，没有云端数据库。记录存在浏览器的本地数据库里，别人打不开，我也拿不到。</p>
+          <ul class="lp-list">
+            <li>换设备时导出成文件搬过去，导入即恢复</li>
+            <li>支持深色模式，晚上看不刺眼</li>
+            <li>断网照样能记，联网后不影响任何已有记录</li>
+          </ul>
+        </div>
+        <figure class="lp-feature-shot portrait">
+          <img src="./shots/shot-mobile.png" alt="手机上的 PlanNote：单列任务与底部导航" width="390" height="844" loading="lazy">
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section sample" id="sample">
+    <div class="lp-wrap">
+      <h2>这是它写出来的周报</h2>
+      <p class="lp-sub">
+        下面这份由真实模型生成，只把任务记录喂了进去，没有做人工修改。
+        换到你手上，内容会是你自己那一周的事。
+      </p>
+      <figure class="lp-shot big rise">
+        <img src="./shots/shot-report.png" alt="生成的周报正文：本周概览、精力分配、完成质量、下周建议四个小节" width="1280" height="1040" loading="lazy">
+      </figure>
+      <p class="lp-note">
+        AI 周报需要填一个自己的 API Key（支持 OpenAI 兼容接口）。
+        其余功能——记录、视图、统计、备份——开箱可用，不需要联网。
+      </p>
+    </div>
+  </section>
+
+  <section class="lp-section" id="choices">
+    <div class="lp-wrap narrow">
+      <h2>几个刻意的选择</h2>
+      <p class="lp-sub">这部分是给同行看的：为什么这么做，以及代价是什么。</p>
+      <ol class="lp-choices">
+        <li class="rise">
+          <b>不做后端。</b>
+          计划数据是很私人的东西，存本地能省掉用户的信任成本，也省掉我维护一台服务器的成本。
+          代价是跨设备要手动导出——这个代价我认为值得。
+        </li>
+        <li class="rise">
+          <b>用 IndexedDB，而不是 localStorage。</b>
+          周、月视图要按日期范围聚合查询，localStorage 只适合存小配置。
+          同时保留了 file:// 打开时的降级路径，双击就能用。
+        </li>
+        <li class="rise">
+          <b>把规则放在提示词最前面。</b>
+          模型对靠前的约束更敏感，所以规则块用显式分隔符包起来、排在通用要求之前，
+          并写明「冲突时以它为准」。这是规则能真正生效的关键。
+        </li>
+        <li class="rise">
+          <b>为周报写了 45 项自动化测试。</b>
+          周报是这个应用的核心价值，靠手点验不住。测试会抓真实发出的请求体，
+          确认范围限定只带了指定模块的记录、规则原文完整进入了提示词。
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="lp-cta">
+    <div class="lp-wrap">
+      <h2>现在就能用</h2>
+      <p>打开即用，不需要注册。数据从第一条记录开始，就只属于你。</p>
+      <div class="lp-actions center">
+        <a class="lp-btn primary lg" href="./app.html">打开应用</a>
+        <a class="lp-btn ghost lg" href="https://github.com/02Ruichen/PlanNote" target="_blank" rel="noopener">看源码</a>
+      </div>
+      <p class="lp-fine">AI 周报需要你自己的 API Key · 其余功能开箱可用</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="lp-footer">
+  <div class="lp-wrap lp-footer-inner">
+    <span>PlanNote · 个人计划管理</span>
+    <span>MIT License · 数据存储在你自己的设备上</span>
+  </div>
+</footer>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+<script>
+// 滚动进入时轻微上浮，只做一次
+(() => {
+  const items = document.querySelectorAll('.rise');
+  if (!('IntersectionObserver' in window)) {
+    items.forEach((el) => el.classList.add('in'));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: .08 });
+  items.forEach((el) => io.observe(el));
+})();
+</script>
+
 </body>
 </html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PlanNote · 极简个人计划管理</title>
+<meta name="description" content="记录每天要做的事，周末自动生成周报。莫兰迪质感，数据留在你自己的设备上。">
+<meta name="theme-color" content="#F2EFEC">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+  <div class="blob blob-a"></div>
+  <div class="blob blob-b"></div>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">P</div>
+        <div class="brand-text">
+          <div class="brand-name">PLANNOTE</div>
+          <div class="brand-sub">计划 · 记录 · 周报</div>
+        </div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="sidebar-foot">
+        <button class="nav-item" data-action="settings">
+          <span class="ico" id="settings-ico"></span><span class="nav-label">设置</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar" id="topbar"></header>
+      <div class="content scroll" id="content"></div>
+    </main>
+  </div>
+
+  <div id="modal-root"></div>
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script src="assets/db.js" defer></script>
+  <script src="assets/report.js" defer></script>
+  <script src="assets/app.js" defer></script>
+</body>
+</html>

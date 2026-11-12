@@ -7,8 +7,9 @@
 
 ## 怎么打开
 
-**方式一：直接双击 `index.html`**
+**方式一：直接双击 `app.html`**
 最简单的本地体验。数据存在浏览器 localStorage 里，关掉再开还在。
+（`index.html` 是作品介绍页，`app.html` 才是应用本体。）
 
 **方式二：起一个本地服务（推荐，能体验 PWA 安装）**
 
@@ -126,16 +127,34 @@ node run-tests.mjs --live   # 加真实调用（把 Key 写进 test/.key，或�
 
 ```
 app/
-├── index.html              入口
+├── index.html              作品介绍页（站点首页）
+├── app.html                应用本体
 ├── manifest.webmanifest    PWA 配置
 ├── sw.js                   离线缓存
 ├── icons/                  图标
+├── shots/                  介绍页配图（由 test/capture-shots.mjs 生成）
 └── assets/
     ├── theme.css           设计系统（颜色/圆角/阴影/字号）
+    ├── landing.css         介绍页样式
     ├── db.js               数据层（存储 + 日期工具）
     ├── report.js           周报引擎（调用 OpenAI 兼容接口）
     └── app.js              界面与交互
 test/
 ├── cdp.mjs                 极简 CDP 客户端 + 静态服务 + 模拟 AI 接口
-└── run-tests.mjs           端到端测试（T1–T5）
+├── run-tests.mjs           端到端测试（T1–T5）
+├── capture-shots.mjs       生成介绍页配图（写入示例数据后截图）
+└── verify-landing.mjs      介绍页整页渲染校验
 ```
+
+---
+
+## 部署
+
+站点通过 GitHub Actions 发布到 GitHub Pages，只上传 `app/` 目录：
+
+- 工作流：`.github/workflows/pages.yml`
+- 触发：推到 `main` 且 `app/**` 有改动，或手动触发
+- 地址：https://02ruichen.github.io/PlanNote/
+
+**发版注意**：改动前端资源后，记得把 `sw.js` 里的 `CACHE` 版本号加一，
+否则老访客会一直拿到缓存里的旧版本。
